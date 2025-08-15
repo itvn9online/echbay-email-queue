@@ -20,6 +20,7 @@ class EMQM_Activator
     {
         self::create_tables();
         self::set_default_options();
+        // Không cần schedule cron vì sử dụng cronjob server
         // self::schedule_cron();
     }
 

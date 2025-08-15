@@ -138,25 +138,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>"); ?></textarea>
         </div>
-        <code>
-            <?php echo esc_html(str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH)); ?>cron-send.php?active_wp_mail=1
-        </code>
 
-        <h4><?php _e('Server Cron (Alternative)', 'echbay-mail-queue'); ?></h4>
-        <p><?php _e('Add this to your server crontab:', 'echbay-mail-queue'); ?></p>
+        <h4><?php _e('Server Cron (Required)', 'echbay-mail-queue'); ?></h4>
+        <p><?php _e('Add this to your server crontab (runs every minute):', 'echbay-mail-queue'); ?></p>
         <code>
-            */5 * * * * /usr/bin/php <?php echo esc_html(EMQM_PLUGIN_PATH . 'cron-send.php'); ?> > /dev/null 2>&1
+            * * * * * curl -s "<?php echo esc_html(str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH)); ?>cron-send.php?active_wp_mail=1" > /dev/null 2>&1
         </code>
-
-        <h4><?php _e('WP Cron Status', 'echbay-mail-queue'); ?></h4>
-        <p>
-            <?php if (1 > 2 && wp_next_scheduled('emqm_process_queue')): ?>
-                <span class="status-active"><?php _e('Active', 'echbay-mail-queue'); ?></span> -
-                <?php _e('Next run:', 'echbay-mail-queue'); ?> <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), wp_next_scheduled('emqm_process_queue'))); ?>
-            <?php else: ?>
-                <span class="status-inactive"><?php _e('Inactive', 'echbay-mail-queue'); ?></span>
-            <?php endif; ?>
-        </p>
+        <p><em><?php _e('This plugin no longer uses WordPress cron. Please use server cron for better reliability.', 'echbay-mail-queue'); ?></em></p>
     </div>
 
     <?php submit_button(); ?>

@@ -31,6 +31,6 @@ foreach ($options as $option) {
     delete_option($option);
 }
 
-// Clear scheduled events
-wp_clear_scheduled_hook('emqm_process_queue');
-wp_clear_scheduled_hook('emqm_cleanup_old_emails');
+// Clear scheduled events - không cần thiết vì đã bỏ WordPress cron
+// wp_clear_scheduled_hook('emqm_process_queue');
+// wp_clear_scheduled_hook('emqm_cleanup_old_emails');

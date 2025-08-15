@@ -18,7 +18,8 @@ class EMQM_Deactivator
      */
     public static function deactivate()
     {
-        self::clear_scheduled_events();
+        // Không cần clear scheduled events vì đã bỏ WordPress cron
+        // self::clear_scheduled_events();
     }
 
     /**

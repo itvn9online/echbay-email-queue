@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.5] - 2025-08-16
+
+### Changed
+
+- **BREAKING CHANGE**: Removed WordPress cron functionality completely
+- Now uses only server cronjob for better reliability and performance
+- Removed `class-cron.php` file as it's no longer needed
+- Updated admin settings to show server cron instructions instead of WP cron status
+- Simplified activation/deactivation processes without cron scheduling
+- Updated cron command example with proper curl syntax for server crontab
+
+### Removed
+
+- WordPress cron schedules (`emqm_five_minutes`, `emqm_two_minutes`, `emqm_one_minute`)
+- WP cron event scheduling and clearing
+- `wp_schedule_event`, `wp_clear_scheduled_hook`, `wp_next_scheduled` dependencies
+- `EMQM_Cron` class and related functionality
+
 ## [1.0.0] - 2025-08-14
 
 ### Added
