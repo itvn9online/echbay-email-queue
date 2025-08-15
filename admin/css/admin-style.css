@@ -1,0 +1,238 @@
+/* Admin CSS for Echbay Mail Queue Manager */
+
+.emqm-queue-stats {
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1d2327;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.emqm-filters {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.emqm-filters form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.emqm-email-list {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.emqm-email-list table {
+    margin: 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+}
+
+.badge-warning {
+    background-color: #f0ad4e;
+    color: #fff;
+}
+
+.badge-success {
+    background-color: #5cb85c;
+    color: #fff;
+}
+
+.badge-danger {
+    background-color: #d9534f;
+    color: #fff;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.actions .button {
+    margin-right: 5px;
+    margin-bottom: 0;
+}
+
+.email-details-content {
+    background: #f9f9f9;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.email-details-content h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 10px;
+}
+
+.email-message {
+    background: #fff;
+    border: 1px solid #e1e1e1;
+    padding: 10px;
+    border-radius: 3px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.error-message {
+    background: #fff2f2;
+    border: 1px solid #dc3232;
+    color: #dc3232;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.emqm-pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.emqm-pagination span,
+.emqm-pagination a {
+    border: 1px #ccc solid;
+    display: inline-block;
+    padding: 5px;
+    border-radius: 4px;
+    min-width: 20px;
+}
+
+.emqm-pagination span {
+    font-weight: bold;
+}
+
+.emqm-cron-info {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.emqm-cron-info h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 10px;
+}
+
+.emqm-cron-info h4 {
+    color: #0073aa;
+    margin-bottom: 10px;
+}
+
+.emqm-cron-info code {
+    display: block;
+    background: #f1f1f1;
+    border: 1px solid #dfdfdf;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.status-active {
+    color: #46b450;
+    font-weight: bold;
+}
+
+.status-inactive {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+.mail-queue-status-pending,
+.mail-queue-status-sent,
+.mail-queue-status-failed {
+    color: #fff !important;
+    border: 0 none !important;
+}
+
+.mail-queue-status-pending {
+    background-color: #f0ad4e !important;
+}
+
+.mail-queue-status-sent {
+    background-color: #5cb85c !important;
+}
+
+.mail-queue-status-failed {
+    background-color: #d9534f !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .emqm-filters form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .actions {
+        white-space: nowrap;
+    }
+
+    .actions .button {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
