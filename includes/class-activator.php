@@ -74,7 +74,7 @@ class EMQM_Activator
             'max_attempts' => 3,
             'delete_sent_after_days' => 30,
             'use_wp_cron' => 0,
-            'prevent_duplicates' => 0,
+            'prevent_duplicates' => 1,
         );
 
         foreach ($default_options as $option => $value) {

@@ -118,7 +118,7 @@ class EMQM_Mail_Queue
         global $wpdb;
 
         // Check for recent duplicate emails (within last 5 minutes) if prevention is enabled
-        if (get_option('emqm_prevent_duplicates', 0)) {
+        if (get_option('emqm_prevent_duplicates', 1)) {
             $recent_duplicate = $wpdb->get_var($wpdb->prepare("
                 SELECT COUNT(id) FROM {$this->table_name} 
                 WHERE to_email = %s 
@@ -201,13 +201,14 @@ class EMQM_Mail_Queue
         // Initialize counters
         $count = 0;
         foreach ($emails as $email) {
-            $this->send_email($email);
-            $count++;
-
             // Check if we've reached the time limit
             if (time() > $time_limit) {
                 break;
             }
+
+            // 
+            $this->send_email($email);
+            $count++;
         }
 
         // Re-add our hook

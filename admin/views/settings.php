@@ -106,7 +106,7 @@ if (!defined('ABSPATH')) {
                     <label for="emqm_prevent_duplicates"><?php _e('Prevent Duplicates', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>
-                    <input type="checkbox" id="emqm_prevent_duplicates" name="emqm_prevent_duplicates" value="1" <?php checked(get_option('emqm_prevent_duplicates', 0), 1); ?> />
+                    <input type="checkbox" id="emqm_prevent_duplicates" name="emqm_prevent_duplicates" value="1" <?php checked(get_option('emqm_prevent_duplicates', 1), 1); ?> />
                     <p class="description"><?php _e('Prevent duplicate emails with same recipient and subject within 5 minutes.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>

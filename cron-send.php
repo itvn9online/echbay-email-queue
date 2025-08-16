@@ -29,7 +29,19 @@ if (!isset($_GET['emqm_id'])) {
 }
 
 // Load WordPress
-if (!is_file('../../../wp-load.php')) {
+$wp_loaded = false;
+$wp_load_php = '../wp-load.php';
+for ($i = 0; $i < 10; $i++) {
+    // echo $wp_load_php . '<br>' . PHP_EOL;
+    if (is_file($wp_load_php)) {
+        require_once $wp_load_php;
+        $wp_loaded = true;
+        break;
+    }
+    $wp_load_php = '../' . $wp_load_php; // Try parent directories
+}
+
+if (!$wp_loaded) {
     http_response_code(500);
     echo json_encode(array(
         'success' => false,
@@ -37,9 +49,6 @@ if (!is_file('../../../wp-load.php')) {
     ));
     exit();
 }
-
-// 
-require_once('../../../wp-load.php');
 
 // 
 if (!class_exists('EMQM_Mail_Queue')) {
