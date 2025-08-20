@@ -26,6 +26,28 @@ if (!isset($_GET['emqm_id'])) {
 
     // Update last run time
     file_put_contents($last_run_option, $current_time, LOCK_EX);
+
+    // 
+    $file_count_failed = __DIR__ . '/failed_email_count.log';
+    if (is_file($file_count_failed)) {
+        $failed_email_count = intval(explode('|', file_get_contents($file_count_failed))[0]);
+        // echo 'Failed email count: ' . $failed_email_count . '<br>' . PHP_EOL;
+
+        // nếu gửi thất bại quá 5 lần
+        if ($failed_email_count > 5) {
+            // lấy thời gian ghi nhận cuối
+            $failed_email_time = intval(explode('|', file_get_contents($file_count_failed))[1]);
+            // echo 'Failed email time: ' . $failed_email_time . '<br>' . PHP_EOL;
+            // giãn cách tầm 600s
+            if (time() - $failed_email_time < 600) {
+                echo json_encode(array(
+                    'success' => false,
+                    'message' => 'Failed email limit reached with ' . $failed_email_count . ' attempts in ' . date('Y-m-d H:i:s', $failed_email_time) . '. Please try again later.',
+                ));
+                exit();
+            }
+        }
+    }
 }
 
 // Load WordPress

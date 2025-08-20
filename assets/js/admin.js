@@ -149,8 +149,9 @@ jQuery(document).ready(function ($) {
 		var $button = $(this);
 		$button.prop("disabled", true).text("Processing...");
 
+		// thêm tham số active_wp_mail vào url lúc submit thì lệnh gửi mới được tiến hành
 		$.ajax({
-			url: emqm_ajax.ajaxurl,
+			url: emqm_ajax.ajaxurl + "?active_wp_mail=1",
 			type: "POST",
 			data: {
 				action: "emqm_process_queue_manually",

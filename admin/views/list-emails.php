@@ -85,9 +85,9 @@ $cron_send_url = str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH) . 
                             echo $email->attempts . '/' . $email->max_attempts;
 
                             // thêm link gửi lại email khi vượt quá ngưỡng
-                            if ($email->status != 'sent' && $email->attempts >= $email->max_attempts) {
-                                echo ' &nbsp; <a href="' . $cron_send_url . '&emqm_id=' . $email->id . '" class="button button-small resend-email" target="_blank">' . __('Resend', 'echbay-mail-queue') . '</a>';
-                            }
+                            // if ($email->status != 'sent' && $email->attempts >= $email->max_attempts) {
+                            // echo ' &nbsp; <a href="' . $cron_send_url . '&emqm_id=' . $email->id . '" class="button button-small resend-email" target="_blank">' . __('Resend', 'echbay-mail-queue') . '</a>';
+                            // }
                             ?>
                         </td>
                         <td><?php echo $email->created_at; ?></td>

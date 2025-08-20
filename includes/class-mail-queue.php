@@ -175,7 +175,7 @@ class EMQM_Mail_Queue
                 WHERE id = %d
             ", intval($_GET['emqm_id'])));
         } else {
-            $batch_size = get_option('emqm_batch_size', 10);
+            $batch_size = get_option('emqm_batch_size', 20);
 
             // Get pending emails ordered by priority and created date
             $emails = $wpdb->get_results($wpdb->prepare("
@@ -207,7 +207,10 @@ class EMQM_Mail_Queue
             }
 
             // 
-            $this->send_email($email);
+            if (!$this->send_email($email)) {
+                // Handle failed email -> gửi lỗi thì out luôn thôi
+                break;
+            }
             $count++;
         }
 
@@ -242,6 +245,9 @@ class EMQM_Mail_Queue
         // $sent = wp_mail($to, $subject, $message, $headers, $attachments);
         $sent = wp_mail($to, $subject, $message, $headers);
 
+        // tạo file log để tính số lần gửi mail thất bại
+        $file_count_failed = EMQM_PLUGIN_PATH . 'failed_email_count.log';
+
         if ($sent) {
             // Mark as sent
             $wpdb->update(
@@ -258,6 +264,14 @@ class EMQM_Mail_Queue
             if ($this->enable_logging) {
                 error_log('EMQM: Email sent successfully to ' . $to . ' - Subject: ' . $subject);
             }
+
+            // xóa file log
+            if (is_file($file_count_failed)) {
+                unlink($file_count_failed);
+            }
+
+            // 
+            return true;
         } else {
             // Check if max attempts reached
             if ($email->attempts + 1 >= $email->max_attempts) {
@@ -274,6 +288,16 @@ class EMQM_Mail_Queue
             if ($this->enable_logging) {
                 error_log('EMQM: Failed to send email to ' . $to . ' - Subject: ' . $subject);
             }
+
+            // tính toán số lần thất bại
+            $failed_email_count = 0;
+            if (is_file($file_count_failed)) {
+                $failed_email_count = intval(explode('|', file_get_contents($file_count_failed))[0]);
+            }
+            file_put_contents($file_count_failed, ($failed_email_count + 1) . '|' . time(), LOCK_EX);
+
+            // 
+            return false;
         }
     }
 

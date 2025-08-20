@@ -29,7 +29,7 @@ class EMQM_Admin_Page
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_emqm_retry_email', array($this, 'ajax_retry_email'));
         add_action('wp_ajax_emqm_delete_email', array($this, 'ajax_delete_email'));
-        // add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
+        add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
     }
 
     /**
@@ -231,7 +231,7 @@ class EMQM_Admin_Page
             wp_die(__('Unauthorized', 'echbay-mail-queue'));
         }
 
-        // $this->mail_queue->process_queue();
+        $this->mail_queue->process_queue();
 
         wp_send_json_success(__('Queue processed successfully.', 'echbay-mail-queue'));
     }
