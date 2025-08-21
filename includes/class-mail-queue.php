@@ -212,6 +212,9 @@ class EMQM_Mail_Queue
                 break;
             }
             $count++;
+
+            // Thêm sleep để tránh quá tải server, có thể điều chỉnh theo nhu cầu
+            // sleep(1);
         }
 
         // Re-add our hook
@@ -290,11 +293,13 @@ class EMQM_Mail_Queue
             }
 
             // tính toán số lần thất bại
-            $failed_email_count = 0;
             if (is_file($file_count_failed)) {
+                $failed_email_count = 0;
                 $failed_email_count = intval(explode('|', file_get_contents($file_count_failed))[0]);
+                file_put_contents($file_count_failed, ($failed_email_count + 1) . '|' . time(), LOCK_EX);
+            } else {
+                file_put_contents($file_count_failed, '1|' . time(), LOCK_EX);
             }
-            file_put_contents($file_count_failed, ($failed_email_count + 1) . '|' . time(), LOCK_EX);
 
             // 
             return false;
