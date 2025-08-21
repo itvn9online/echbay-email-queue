@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.8] - 2025-08-22
+
+### Added
+
+- **Auto-update functionality**: Plugin can now automatically check and update from GitHub
+- GitHub integration for version checking via `https://github.com/itvn9online/echbay-email-queue/raw/refs/heads/main/VERSION`
+- Manual update check button in admin settings page
+- Auto-download and install updates from GitHub releases
+- Update notifications in WordPress admin plugins page
+- `EMQM_Auto_Updater` class for handling all update operations
+
+### Changed
+
+- Plugin version reading now uses external VERSION file instead of hardcoded constant
+- Enhanced admin interface with update checking section
+- Added AJAX endpoint for manual update checking
+
+### Technical Details
+
+- Integrates with WordPress update system using `pre_set_site_transient_update_plugins` filter
+- Handles GitHub archive extraction and proper plugin directory structure
+- Supports WordPress standard update workflow and notifications
+- Version comparison and update availability detection
+
 ## [1.0.5] - 2025-08-16
 
 ### Changed

@@ -215,4 +215,67 @@ jQuery(document).ready(function ($) {
 			$(".bulk-actions").remove();
 		}
 	});
+
+	// Check for updates
+	$("#emqm-check-update").on("click", function (e) {
+		e.preventDefault();
+
+		var $button = $(this);
+		var $status = $("#emqm-update-status");
+		var $info = $("#emqm-update-info");
+		var $details = $("#emqm-update-details");
+
+		$button.prop("disabled", true).text("Checking...");
+		$status.html('<span style="color: #666;">Checking for updates...</span>');
+		$info.hide();
+
+		$.ajax({
+			url: emqm_ajax.ajaxurl,
+			type: "POST",
+			data: {
+				action: "emqm_check_update",
+				nonce: emqm_ajax.nonce,
+			},
+			success: function (response) {
+				if (response.success) {
+					var data = response.data;
+
+					if (data.has_update) {
+						$status.html(
+							'<span style="color: #d63384;"><strong>Update Available!</strong></span>'
+						);
+						$details.html(
+							"<p><strong>New Version:</strong> " +
+								data.remote_version +
+								"</p>" +
+								'<p><strong>Download:</strong> <a href="' +
+								window.location.href.replace(/page=.*/, "page=plugins") +
+								'" target="_blank">Go to Plugins page to update</a></p>' +
+								'<p style="color: #666;"><em>The update will appear in your WordPress admin plugins page.</em></p>'
+						);
+					} else {
+						$status.html('<span style="color: #198754;">✓ Up to date</span>');
+						$details.html("<p>" + data.message + "</p>");
+					}
+
+					$info.show();
+				} else {
+					$status.html(
+						'<span style="color: #dc3545;">Error checking updates</span>'
+					);
+					showNotice(
+						response.data.message || "Failed to check for updates",
+						"error"
+					);
+				}
+			},
+			error: function () {
+				$status.html('<span style="color: #dc3545;">Connection error</span>');
+				showNotice("Unable to connect to GitHub", "error");
+			},
+			complete: function () {
+				$button.prop("disabled", false).text("Check for Updates");
+			},
+		});
+	});
 });

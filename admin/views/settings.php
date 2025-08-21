@@ -139,6 +139,18 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>"); ?></textarea>
         </div>
 
+        <h4><?php _e('Plugin Updates', 'echbay-mail-queue'); ?></h4>
+        <div id="emqm-update-section">
+            <p>
+                <button type="button" id="emqm-check-update" class="button"><?php _e('Check for Updates', 'echbay-mail-queue'); ?></button>
+                <span id="emqm-update-status" style="margin-left: 10px;"></span>
+            </p>
+            <div id="emqm-update-info" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9;">
+                <p><strong><?php _e('Current Version:', 'echbay-mail-queue'); ?></strong> <?php echo EMQM_VERSION; ?></p>
+                <div id="emqm-update-details"></div>
+            </div>
+        </div>
+
         <h4><?php _e('Server Cron (Required)', 'echbay-mail-queue'); ?></h4>
         <p><?php _e('Add this to your server crontab (runs every minute):', 'echbay-mail-queue'); ?></p>
         <code>

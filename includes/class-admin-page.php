@@ -30,6 +30,7 @@ class EMQM_Admin_Page
         add_action('wp_ajax_emqm_retry_email', array($this, 'ajax_retry_email'));
         add_action('wp_ajax_emqm_delete_email', array($this, 'ajax_delete_email'));
         add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
+        add_action('wp_ajax_emqm_check_update', array($this, 'ajax_check_update'));
     }
 
     /**
@@ -234,5 +235,32 @@ class EMQM_Admin_Page
         $this->mail_queue->process_queue();
 
         wp_send_json_success(__('Queue processed successfully.', 'echbay-mail-queue'));
+    }
+
+    /**
+     * AJAX handler for checking updates
+     */
+    public function ajax_check_update()
+    {
+        check_ajax_referer('emqm_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized', 'echbay-mail-queue'));
+        }
+
+        // Use global auto updater instance
+        global $emqm_auto_updater;
+
+        if (!$emqm_auto_updater) {
+            $emqm_auto_updater = new EMQM_Auto_Updater(EMQM_PLUGIN_PATH . 'echbay-mail-queue-manager.php');
+        }
+
+        $result = $emqm_auto_updater->manual_check_update();
+
+        if ($result['success']) {
+            wp_send_json_success($result);
+        } else {
+            wp_send_json_error($result);
+        }
     }
 }
