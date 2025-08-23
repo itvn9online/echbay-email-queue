@@ -21,7 +21,7 @@ Plugin Echbay Mail Queue Manager giờ đây có thêm tính năng **Admin Auto-
 
 ### 3. Script được nhúng
 
-Script từ file `admin/views/frontend.html` sẽ được inject vào `admin_footer`:
+Script từ file `assets/frontend.html` sẽ được inject vào `admin_footer`:
 
 ```html
 <script>
@@ -126,7 +126,7 @@ Plugin có cơ chế **rate limiting** tích hợp:
 
 3. **Kiểm tra file tồn tại**:
    ```php
-   file_exists(EMQM_PLUGIN_PATH . 'admin/views/frontend.html')
+   file_exists(EMQM_PLUGIN_PATH . 'assets/frontend.html')
    ```
 
 ### Console errors

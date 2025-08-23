@@ -76,6 +76,7 @@ class EMQM_Activator
             'use_wp_cron' => 0,
             'prevent_duplicates' => 1,
             'admin_autorun' => 1,
+            'frontend_autorun' => 0,
         );
 
         foreach ($default_options as $option => $value) {

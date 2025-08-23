@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.9] - 2025-08-23
+
+### Added
+
+- **Frontend Auto-run Cronjob option**: New setting `emqm_frontend_autorun` (default: disabled)
+- Automatic cronjob execution in frontend footer when visitors access pages
+- Triple cronjob reliability: Server cron + Admin backup + Frontend backup
+- Integration with existing frontend.html auto-run script for frontend pages
+- Performance-conscious implementation with default disabled setting
+
+### Changed
+
+- Enhanced admin settings page with new "Frontend Auto-run Cronjob" option
+- Improved script injection comments to distinguish admin vs frontend execution
+- Added proper frontend/admin context checks for script execution
+
+### Technical Details
+
+- Frontend auto-run script injected via `wp_footer` hook
+- Only executes on frontend pages (not admin) when option is enabled
+- Uses same `frontend.html` content with URL placeholder replacement
+- Provides third-level backup for email queue processing
+- Default disabled to avoid performance impact unless specifically needed
+
 ## [1.0.8] - 2025-08-23
 
 ### Added

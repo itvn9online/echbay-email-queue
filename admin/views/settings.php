@@ -120,6 +120,16 @@ if (!defined('ABSPATH')) {
                     <p class="description"><?php _e('Automatically run cronjob in admin footer when admin users visit pages. This provides backup processing if server cron fails.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="emqm_frontend_autorun"><?php _e('Frontend Auto-run Cronjob', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <input type="checkbox" id="emqm_frontend_autorun" name="emqm_frontend_autorun" value="1" <?php checked(get_option('emqm_frontend_autorun', 0), 1); ?> />
+                    <p class="description"><?php _e('Automatically run cronjob in frontend footer when visitors access pages. Only enable if server cron is unreliable as this may impact page performance.', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
         </tbody>
     </table>
 
@@ -138,7 +148,7 @@ if (!defined('ABSPATH')) {
         <h4><?php _e('Client-side Cron (Recommended)', 'echbay-mail-queue'); ?></h4>
         <p><?php _e('Add this JavaScript code to your theme footer to process emails on each page visit:', 'echbay-mail-queue'); ?></p>
         <div>
-            <textarea readonly rows="10" ondblclick="this.select();" style="width: 99%;"><?php echo esc_html(str_replace('{base_plugin_url}', EMQM_PLUGIN_URL, file_get_contents(__DIR__ . '/frontend.html'))); ?></textarea>
+            <textarea readonly rows="12" ondblclick="this.select();" style="width: 99%;"><?php echo esc_html(str_replace('{base_plugin_url}', EMQM_PLUGIN_URL, file_get_contents(EMQM_PLUGIN_PATH . 'assets/frontend.html'))); ?></textarea>
         </div>
 
         <h4><?php _e('Plugin Updates', 'echbay-mail-queue'); ?></h4>
