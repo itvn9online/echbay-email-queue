@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.8] - 2025-08-23
+
+### Added
+
+- **Admin Auto-run Cronjob option**: New setting `emqm_admin_autorun` (default: enabled)
+- Automatic cronjob execution in admin footer when admin users visit pages
+- Backup processing system in case server cron fails
+- Integration with existing frontend.html auto-run script
+- Admin-only execution with proper permission checks
+
+### Changed
+
+- Enhanced admin settings page with new "Admin Auto-run Cronjob" option
+- Improved reliability with dual cronjob approach (server + admin backup)
+- Admin footer injection only for users with `manage_options` capability
+
+### Technical Details
+
+- Auto-run script injected via `admin_footer` hook
+- Uses existing `frontend.html` content with URL placeholder replacement
+- Only executes for admin users and when option is enabled
+- Provides seamless backup for email queue processing
+
+## [1.0.7] - 2025-08-22hangelog
+
 ## [1.0.8] - 2025-08-22
 
 ### Added

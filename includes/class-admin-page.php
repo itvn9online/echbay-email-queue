@@ -31,6 +31,9 @@ class EMQM_Admin_Page
         add_action('wp_ajax_emqm_delete_email', array($this, 'ajax_delete_email'));
         add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
         add_action('wp_ajax_emqm_check_update', array($this, 'ajax_check_update'));
+
+        // Add admin footer script if autorun is enabled
+        add_action('admin_footer', array($this, 'admin_footer_autorun_script'));
     }
 
     /**
@@ -61,6 +64,7 @@ class EMQM_Admin_Page
         register_setting('emqm_settings', 'emqm_delete_sent_after_days');
         register_setting('emqm_settings', 'emqm_use_wp_cron');
         register_setting('emqm_settings', 'emqm_prevent_duplicates');
+        register_setting('emqm_settings', 'emqm_admin_autorun');
     }
 
     /**
@@ -161,6 +165,7 @@ class EMQM_Admin_Page
             update_option('emqm_delete_sent_after_days', absint($_POST['emqm_delete_sent_after_days']));
             update_option('emqm_use_wp_cron', isset($_POST['emqm_use_wp_cron']) ? 1 : 0);
             update_option('emqm_prevent_duplicates', isset($_POST['emqm_prevent_duplicates']) ? 1 : 0);
+            update_option('emqm_admin_autorun', isset($_POST['emqm_admin_autorun']) ? 1 : 0);
 
             echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'echbay-mail-queue') . '</p></div>';
         }
@@ -261,6 +266,32 @@ class EMQM_Admin_Page
             wp_send_json_success($result);
         } else {
             wp_send_json_error($result);
+        }
+    }
+
+    /**
+     * Inject auto-run script into admin footer
+     */
+    public function admin_footer_autorun_script()
+    {
+        // Only run on admin pages and if autorun is enabled
+        if (!get_option('emqm_admin_autorun', 1)) {
+            return;
+        }
+
+        // Read frontend.html content and inject it
+        $frontend_html_path = EMQM_PLUGIN_PATH . 'admin/views/frontend.html';
+
+        if (file_exists($frontend_html_path)) {
+            $content = file_get_contents($frontend_html_path);
+
+            // Replace placeholder with actual plugin URL
+            $content = str_replace('{base_plugin_url}', EMQM_PLUGIN_URL, $content);
+
+            // Output the script
+            echo "\n<!-- Echbay Email Queue Auto-run Script -->\n";
+            echo $content;
+            echo "\n<!-- End Echbay Email Queue Auto-run Script -->\n";
         }
     }
 }

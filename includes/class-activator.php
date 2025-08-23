@@ -75,6 +75,7 @@ class EMQM_Activator
             'delete_sent_after_days' => 30,
             'use_wp_cron' => 0,
             'prevent_duplicates' => 1,
+            'admin_autorun' => 1,
         );
 
         foreach ($default_options as $option => $value) {

@@ -110,6 +110,16 @@ if (!defined('ABSPATH')) {
                     <p class="description"><?php _e('Prevent duplicate emails with same recipient and subject within 5 minutes.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="emqm_admin_autorun"><?php _e('Admin Auto-run Cronjob', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <input type="checkbox" id="emqm_admin_autorun" name="emqm_admin_autorun" value="1" <?php checked(get_option('emqm_admin_autorun', 1), 1); ?> />
+                    <p class="description"><?php _e('Automatically run cronjob in admin footer when admin users visit pages. This provides backup processing if server cron fails.', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
         </tbody>
     </table>
 
