@@ -4,9 +4,7 @@
 
 function echbay_mail_queue_cron_send() {
 	jQuery.ajax({
-		url:
-			window.location.origin +
-			"/wp-content/plugins/echbay-email-queue/cron-send.php?active_wp_mail=1",
+		url: echbayEmailQueueBaseUrl + "cron-send.php?active_wp_mail=1",
 		type: "GET",
 		success: function (response) {
 			if (response.success) {

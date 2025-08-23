@@ -1,0 +1,10 @@
+<script>
+    const echbayEmailQueueBaseUrl = '{base_plugin_url}';
+    document.addEventListener('DOMContentLoaded', function () {
+        var script = document.createElement('script');
+        script.src = echbayEmailQueueBaseUrl + 'assets/js/frontend.js?v=' + Math.random();
+        script.type = 'text/javascript';
+        script.defer = true; // hoặc script.async = true;
+        document.body.appendChild(script); // chèn vào cuối body (footer)
+    });
+</script>

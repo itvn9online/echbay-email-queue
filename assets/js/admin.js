@@ -2,6 +2,12 @@
  * Admin JavaScript for Echbay Mail Queue Manager
  */
 
+// Auto-refresh functionality
+var autoRefreshEnabled =
+	sessionStorage.getItem("emqm_auto_refresh") === "true" || false;
+var autoRefreshInterval;
+
+//
 jQuery(document).ready(function ($) {
 	// Retry email
 	$(".retry-email").on("click", function (e) {
@@ -106,10 +112,6 @@ jQuery(document).ready(function ($) {
 		}
 	});
 
-	// Auto-refresh functionality
-	var autoRefreshEnabled = false;
-	var autoRefreshInterval;
-
 	// Add auto-refresh toggle button
 	if ($(".emqm-filters form").length) {
 		$(".emqm-filters form").append(
@@ -121,18 +123,24 @@ jQuery(document).ready(function ($) {
 
 	$(".auto-refresh-toggle").on("click", function () {
 		var $button = $(this);
-		autoRefreshEnabled = !autoRefreshEnabled;
 
-		if (autoRefreshEnabled) {
+		if (autoRefreshEnabled == true) {
 			$button.text("Disable Auto-refresh").addClass("button-primary");
-			autoRefreshInterval = setInterval(function () {
-				location.reload();
-			}, 30000); // Refresh every 30 seconds
+			sessionStorage.setItem("emqm_auto_refresh", "true");
+			location.reload();
 		} else {
 			$button.text("Enable Auto-refresh").removeClass("button-primary");
+			sessionStorage.removeItem("emqm_auto_refresh");
 			clearInterval(autoRefreshInterval);
 		}
 	});
+
+	if (autoRefreshEnabled == true) {
+		$button.text("Disable Auto-refresh").addClass("button-primary");
+		autoRefreshInterval = setInterval(function () {
+			location.reload();
+		}, 30000); // Refresh every 30 seconds
+	}
 
 	// Process queue manually
 	if ($("#process-queue-manually").length == 0) {

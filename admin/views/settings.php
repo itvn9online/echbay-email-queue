@@ -128,15 +128,7 @@ if (!defined('ABSPATH')) {
         <h4><?php _e('Client-side Cron (Recommended)', 'echbay-mail-queue'); ?></h4>
         <p><?php _e('Add this JavaScript code to your theme footer to process emails on each page visit:', 'echbay-mail-queue'); ?></p>
         <div>
-            <textarea readonly rows="10" ondblclick="this.select();" style="width: 99%;"><?php echo esc_html("<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var script = document.createElement('script');
-    script.src = window.location.origin + '/wp-content/plugins/echbay-email-queue/assets/js/frontend.js?v=' + Math.random();
-    script.type = 'text/javascript';
-    script.defer = true; // hoặc script.async = true;
-    document.body.appendChild(script); // chèn vào cuối body (footer)
-});
-</script>"); ?></textarea>
+            <textarea readonly rows="10" ondblclick="this.select();" style="width: 99%;"><?php echo esc_html(str_replace('{base_plugin_url}', EMQM_PLUGIN_URL, file_get_contents(__DIR__ . '/frontend.html'))); ?></textarea>
         </div>
 
         <h4><?php _e('Plugin Updates', 'echbay-mail-queue'); ?></h4>

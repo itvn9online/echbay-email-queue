@@ -66,4 +66,6 @@ function emqm_add_settings_link($links)
     array_unshift($links, $settings_link);
     return $links;
 }
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'emqm_add_settings_link');
+if (strpos($_SERVER['REQUEST_URI'], '/plugins.php') !== false) {
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'emqm_add_settings_link');
+}
