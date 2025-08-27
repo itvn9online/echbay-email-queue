@@ -134,7 +134,7 @@ class EMQM_Admin_Page
         $table_name = $wpdb->prefix . 'echbay_mail_queue';
         $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'all';
         $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
-        $per_page = 20;
+        $per_page = 50;
         $offset = ($paged - 1) * $per_page;
 
         // Build query

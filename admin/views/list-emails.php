@@ -16,19 +16,19 @@ $cron_send_url = str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH) . 
 <div class="emqm-queue-stats">
     <div class="stats-grid">
         <div class="stat-box">
-            <div class="stat-number"><?php echo $stats['pending']; ?></div>
+            <div class="stat-number"><?php echo number_format($stats['pending']); ?></div>
             <div class="stat-label"><?php _e('Pending', 'echbay-mail-queue'); ?></div>
         </div>
         <div class="stat-box">
-            <div class="stat-number"><?php echo $stats['sent']; ?></div>
+            <div class="stat-number"><?php echo number_format($stats['sent']); ?></div>
             <div class="stat-label"><?php _e('Sent', 'echbay-mail-queue'); ?></div>
         </div>
         <div class="stat-box">
-            <div class="stat-number"><?php echo $stats['failed']; ?></div>
+            <div class="stat-number"><?php echo number_format($stats['failed']); ?></div>
             <div class="stat-label"><?php _e('Failed', 'echbay-mail-queue'); ?></div>
         </div>
         <div class="stat-box">
-            <div class="stat-number"><?php echo $stats['total']; ?></div>
+            <div class="stat-number"><?php echo number_format($stats['total']); ?></div>
             <div class="stat-label"><?php _e('Total', 'echbay-mail-queue'); ?></div>
         </div>
     </div>
