@@ -1,6 +1,7 @@
 /* Admin CSS for Echbay Mail Queue Manager */
 
 .emqm-queue-stats {
+    margin-top: 10px;
     margin-bottom: 20px;
 }
 
@@ -60,7 +61,7 @@
 }
 
 .tab-button {
-    background: #f1f1f1;
+    background: #fff;
     border: 1px solid #ddd;
     border-bottom: none;
     padding: 8px 15px;
@@ -71,25 +72,29 @@
 }
 
 .tab-button.active {
-    background: #fff;
-    border-bottom: 1px solid #fff;
+    background: #f1f1f1;
+    /* border-bottom: 1px solid #fff; */
     position: relative;
     z-index: 1;
+    font-weight: bold;
+    color: #c00;
+    bottom: -1px;
 }
 
 .tab-button:hover {
-    background: #e8e8e8;
+    /* background: #e8e8e8; */
+    color: #f00;
 }
 
 .tab-button.active:hover {
-    background: #fff;
+    /* background: #fff; */
 }
 
 .email-tab-content {
     border: 1px solid #ddd;
     border-top: none;
     padding: 0;
-    margin-top: -1px;
+    /* margin-top: -1px; */
 }
 
 .email-tab-content textarea {
@@ -97,6 +102,92 @@
     border-radius: 0 !important;
     margin: 0 !important;
     resize: vertical;
+}
+
+/* Email source code textarea */
+.email-source-textarea {
+    width: 100%;
+    font-family: monospace;
+    font-size: 12px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* Email preview notice */
+.email-preview-notice {
+    background: #fff3cd;
+    /* border: 1px solid #ffeaa7; */
+    padding: 8px;
+    /* margin-bottom: 10px; */
+    font-size: 12px;
+}
+
+/* Email message preview container */
+.email-message-preview {
+    border-bottom: 1px solid #ddd;
+    padding: 15px;
+    background: white;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Removed content styles */
+.removed-tracking-pixel {
+    color: #ff9800;
+    font-style: italic;
+    font-size: 11px;
+    word-break: break-all;
+}
+
+.removed-image {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f0f0f0;
+    color: #666;
+    font-style: italic;
+    word-break: break-all;
+}
+
+.removed-image-no-src {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f0f0f0;
+    color: #666;
+    font-style: italic;
+}
+
+.removed-script {
+    border: 1px dashed #ff5722;
+    padding: 5px;
+    margin: 5px 0;
+    background: #ffebee;
+    color: #c62828;
+    font-style: italic;
+    font-size: 11px;
+}
+
+.removed-iframe {
+    border: 1px dashed #ff9800;
+    padding: 5px;
+    margin: 5px 0;
+    background: #fff3e0;
+    color: #f57c00;
+    font-style: italic;
+    font-size: 11px;
+    word-break: break-all;
+}
+
+.removed-iframe-no-src {
+    border: 1px dashed #ff9800;
+    padding: 5px;
+    margin: 5px 0;
+    background: #fff3e0;
+    color: #f57c00;
+    font-style: italic;
+    font-size: 11px;
 }
 
 .email-message-preview {
@@ -109,9 +200,9 @@
 }
 
 .emqm-email-list {
-    background: #fff;
-    border: 1px solid #c3c4c7;
-    border-radius: 4px;
+    /* background: #fff; */
+    /* border: 1px solid #c3c4c7; */
+    /* border-radius: 4px; */
 }
 
 .emqm-email-list table {

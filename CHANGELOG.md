@@ -1,5 +1,63 @@
 # Changelog
 
+## [1.1.8] - 2025-08-28
+
+### Changed
+
+- Change css
+
+## [1.1.7] - 2025-08-28
+
+### Changed
+
+- Change css
+
+## [1.1.6] - 2025-08-28
+
+### Changed
+
+- Change css
+
+## [1.1.5] - 2025-08-28
+
+### Changed
+
+- Change css
+
+## [1.1.4] - 2025-08-28
+
+### Improved
+
+- **CSS Code Organization**: Moved inline styles to CSS classes for better maintainability
+- **Cleaner HTML Structure**: Removed numerous inline style attributes from list-emails.php
+- **Better Styling Consistency**: Centralized styling in admin-style.css
+
+### Added
+
+- **New CSS Classes**:
+  - `.email-source-textarea` - For email source code display
+  - `.email-preview-notice` - For preview warning messages
+  - `.email-message-preview` - For email preview container
+  - `.removed-tracking-pixel` - For tracking pixel notifications
+  - `.removed-image` - For removed image notifications with src
+  - `.removed-image-no-src` - For removed images without src
+  - `.removed-script` - For removed script notifications
+  - `.removed-iframe` - For removed iframe notifications with src
+  - `.removed-iframe-no-src` - For removed iframes without src
+
+### Changed
+
+- Replaced inline styles with semantic CSS classes
+- Improved code readability and maintainability
+- Consistent styling across all removed element types
+
+### Technical Details
+
+- Separated presentation from content structure
+- Enhanced CSS organization in admin-style.css
+- Easier customization and theme compatibility
+- Reduced HTML file size and improved performance
+
 ## [1.1.3] - 2025-08-28
 
 ### Improved
