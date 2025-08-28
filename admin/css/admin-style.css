@@ -48,6 +48,66 @@
     gap: 10px;
 }
 
+/* Email message viewer styles */
+.email-message-container {
+    margin-top: 10px;
+}
+
+.email-message-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0;
+}
+
+.tab-button {
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 2px;
+    border-radius: 4px 4px 0 0;
+}
+
+.tab-button.active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    position: relative;
+    z-index: 1;
+}
+
+.tab-button:hover {
+    background: #e8e8e8;
+}
+
+.tab-button.active:hover {
+    background: #fff;
+}
+
+.email-tab-content {
+    border: 1px solid #ddd;
+    border-top: none;
+    padding: 0;
+    margin-top: -1px;
+}
+
+.email-tab-content textarea {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    resize: vertical;
+}
+
+.email-message-preview {
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+}
+
+.email-preview-notice {
+    border-radius: 4px;
+}
+
 .emqm-email-list {
     background: #fff;
     border: 1px solid #c3c4c7;
@@ -208,6 +268,17 @@
 
 .mail-queue-status-failed {
     background-color: #d9534f !important;
+}
+
+.safe_message-src {
+    word-break: break-all;
+    border: 1px dashed #ff9800;
+    padding: 5px;
+    margin: 5px 0;
+    background: #fff3e0;
+    color: #f57c00;
+    font-style: italic;
+    font-size: 11px;
 }
 
 /* Responsive */

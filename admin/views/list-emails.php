@@ -121,7 +121,65 @@ $cron_send_url = str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH) . 
                                     <pre><?php echo esc_html($email->headers); ?></pre>
                                 <?php endif; ?>
                                 <p><strong><?php _e('Message:', 'echbay-mail-queue'); ?></strong></p>
-                                <div class="email-message"><?php echo wp_kses_post($email->message); ?></div>
+                                <div class="email-message-container">
+                                    <div class="email-message-tabs">
+                                        <button type="button" class="tab-button active" onclick="showEmailTab(<?php echo $email->id; ?>, 'source')"><?php _e('Source Code', 'echbay-mail-queue'); ?></button>
+                                        <button type="button" class="tab-button" onclick="showEmailTab(<?php echo $email->id; ?>, 'preview')"><?php _e('Safe Preview', 'echbay-mail-queue'); ?></button>
+                                    </div>
+
+                                    <!-- Source code view (default) -->
+                                    <div id="email-source-<?php echo $email->id; ?>" class="email-tab-content active">
+                                        <textarea readonly rows="10" style="width: 100%; font-family: monospace; font-size: 12px; background: #f9f9f9; border: 1px solid #ddd; padding: 10px;" ondblclick="this.select();"><?php echo esc_html($email->message); ?></textarea>
+                                    </div>
+
+                                    <!-- Safe preview (images and scripts disabled) -->
+                                    <div id="email-preview-<?php echo $email->id; ?>" class="email-tab-content" style="display: none;">
+                                        <div class="email-preview-notice" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 8px; margin-bottom: 10px; font-size: 12px;">
+                                            <strong><?php _e('Note:', 'echbay-mail-queue'); ?></strong> <?php _e('Images and tracking scripts are disabled in this preview to prevent unwanted tracking.', 'echbay-mail-queue'); ?>
+                                        </div>
+                                        <div class="email-message-preview" style="border: 1px solid #ddd; padding: 15px; background: white; max-height: 400px; overflow-y: auto;">
+                                            <?php
+                                            // Strip images and scripts for safe preview
+                                            $safe_message = $email->message;
+
+                                            // Remove tracking pixels first (1x1 images) but show their src
+                                            $safe_message = preg_replace_callback('/<img[^>]*src\s*=\s*["\']([^"\']*)["\'][^>]*width\s*=\s*["\']?1["\']?[^>]*height\s*=\s*["\']?1["\']?[^>]*>/i', function ($matches) {
+                                                $src = esc_html($matches[1]);
+                                                return '<span class="safe_message-src">[Tracking pixel: ' . $src . ']</span>';
+                                            }, $safe_message);
+
+                                            // Also handle height before width pattern
+                                            $safe_message = preg_replace_callback('/<img[^>]*src\s*=\s*["\']([^"\']*)["\'][^>]*height\s*=\s*["\']?1["\']?[^>]*width\s*=\s*["\']?1["\']?[^>]*>/i', function ($matches) {
+                                                $src = esc_html($matches[1]);
+                                                return '<span class="safe_message-src">[Tracking pixel: ' . $src . ']</span>';
+                                            }, $safe_message);
+
+                                            // Remove images but show their src
+                                            $safe_message = preg_replace_callback('/<img[^>]*src\s*=\s*["\']([^"\']*)["\'][^>]*>/i', function ($matches) {
+                                                $src = esc_html($matches[1]);
+                                                return '<div class="safe_message-src">[Image: ' . $src . ']</div>';
+                                            }, $safe_message);
+
+                                            // Remove any remaining img tags without src
+                                            $safe_message = preg_replace('/<img[^>]*>/i', '<div class="safe_message-src">[Image without src removed]</div>', $safe_message);
+
+                                            // Remove scripts
+                                            $safe_message = preg_replace('/<script[^>]*>.*?<\/script>/is', '<div class="safe_message-src">[Script removed for security]</div>', $safe_message);
+
+                                            // Remove potential tracking iframes but show their src
+                                            $safe_message = preg_replace_callback('/<iframe[^>]*src\s*=\s*["\']([^"\']*)["\'][^>]*>/i', function ($matches) {
+                                                $src = esc_html($matches[1]);
+                                                return '<div class="safe_message-src">[iframe: ' . $src . ']</div>';
+                                            }, $safe_message);
+
+                                            // Remove any remaining iframe tags without src
+                                            $safe_message = preg_replace('/<iframe[^>]*>/i', '<div class="safe_message-src">[iframe without src removed]</div>', $safe_message);
+
+                                            echo wp_kses_post($safe_message);
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
                                 <?php if (!empty($email->error_message)): ?>
                                     <p><strong><?php _e('Error:', 'echbay-mail-queue'); ?></strong></p>
                                     <div class="error-message"><?php echo esc_html($email->error_message); ?></div>

@@ -287,3 +287,28 @@ jQuery(document).ready(function ($) {
 		});
 	});
 });
+
+// Email message tab switching function
+function showEmailTab(emailId, tabType) {
+	// Hide all tabs for this email
+	jQuery("#email-source-" + emailId)
+		.removeClass("active")
+		.hide();
+	jQuery("#email-preview-" + emailId)
+		.removeClass("active")
+		.hide();
+
+	// Remove active class from all tab buttons for this email
+	jQuery("#email-source-" + emailId)
+		.closest(".email-message-container")
+		.find(".tab-button")
+		.removeClass("active");
+
+	// Show selected tab
+	jQuery("#email-" + tabType + "-" + emailId)
+		.addClass("active")
+		.show();
+
+	// Add active class to clicked button
+	event.target.classList.add("active");
+}

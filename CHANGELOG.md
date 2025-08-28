@@ -1,5 +1,102 @@
 # Changelog
 
+## [1.1.3] - 2025-08-28
+
+### Improved
+
+- **Enhanced Iframe Display**: Now shows iframe src URLs instead of generic "[iframe removed for security]" message
+- Better iframe tracking detection and analysis capabilities
+- Comprehensive iframe source identification for email debugging
+
+### Changed
+
+- Iframe removal now uses callback function to extract and display src attribute
+- Enhanced visual feedback showing actual iframe URLs: `[iframe: URL]`
+- Added fallback handling for iframes without src attribute
+- Added word-break styling for long iframe URLs
+
+### Technical Details
+
+- Used preg_replace_callback for iframe src extraction
+- Separate handling for iframes with and without src attributes
+- Maintains security while providing debugging information
+- Consistent styling with other removed element types
+
+## [1.1.2] - 2025-08-28
+
+### Improved
+
+- **Enhanced Tracking Pixel Display**: Now shows tracking pixel src URLs instead of generic "[Tracking pixel removed]" message
+- Better tracking detection with support for both width-height and height-width attribute patterns
+- Comprehensive tracking pixel identification for improved email analysis
+
+### Changed
+
+- Tracking pixel removal now uses callback function to extract and display src attribute
+- Added support for both `width="1" height="1"` and `height="1" width="1"` patterns
+- Enhanced visual feedback showing actual tracking pixel URLs: `[Tracking pixel: URL]`
+- Added word-break styling for long tracking URLs
+
+### Technical Details
+
+- Used preg_replace_callback for tracking pixel src extraction
+- Dual regex patterns to handle different attribute ordering
+- Maintains security while providing debugging information
+- Consistent styling with regular image removal
+
+## [1.1.1] - 2025-08-28
+
+### Improved
+
+- **Enhanced Image Display**: Now shows image src URLs instead of generic "[Image removed for security]" message
+- Better debugging experience by displaying actual image sources in safe preview mode
+- Improved tracking pixel detection by processing them before general image removal
+- Added word-break styling for long URLs to prevent layout issues
+
+### Changed
+
+- Image removal now uses callback function to extract and display src attribute
+- Reordered regex processing: tracking pixels handled first, then regular images
+- Enhanced visual feedback with actual image URLs for easier email debugging
+
+### Technical Details
+
+- Used preg_replace_callback to capture src attribute from img tags
+- Added esc_html() sanitization for src URLs
+- Improved regex pattern ordering to handle edge cases
+- Added word-break: break-all CSS for better URL display
+
+## [1.1.0] - 2025-08-23
+
+### Added
+
+- **Secure Email Display Interface**: Implemented tabbed email viewer to prevent tracking activation
+- **Source Code View**: Raw email HTML display in textarea (default view) with double-click to select all
+- **Safe Preview Mode**: Sanitized email preview with images, scripts, and tracking pixels removed
+- Enhanced security warnings for tracking prevention
+- Better email debugging experience with code inspection capability
+
+### Changed
+
+- Email message display now uses tabbed interface instead of direct HTML rendering
+- Default view shows source code to prevent accidental tracking activation
+- Preview mode strips all potentially dangerous elements (images, scripts, iframes)
+- Improved visual distinction between different security levels
+
+### Security
+
+- Prevents tracking pixel activation during email queue review
+- Removes scripts that could execute during email preview
+- Blocks iframe content that might contain tracking beacons
+- Maintains email content visibility while prioritizing security
+
+### Technical Details
+
+- Added CSS grid layout for email message tabs
+- JavaScript tab switching with email ID-specific content areas
+- Enhanced regex patterns for comprehensive tracking element removal
+- WordPress security function integration (wp_kses_post, esc_html)
+
 ## [1.0.9] - 2025-08-23
 
 ### Added
