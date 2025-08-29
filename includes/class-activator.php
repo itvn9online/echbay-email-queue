@@ -66,7 +66,7 @@ class EMQM_Activator
     private static function set_default_options()
     {
         $default_options = array(
-            'batch_size' => 20,
+            'batch_size' => 5,
             'cron_interval' => 5, // minutes
             'enable_queue' => 1,
             'queue_for_guests_only' => 1,

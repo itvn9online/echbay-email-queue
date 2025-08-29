@@ -175,7 +175,7 @@ class EMQM_Mail_Queue
                 WHERE id = %d
             ", intval($_GET['emqm_id'])));
         } else {
-            $batch_size = get_option('emqm_batch_size', 20);
+            $batch_size = get_option('emqm_batch_size', 5);
 
             // Get pending emails ordered by priority and created date
             $emails = $wpdb->get_results($wpdb->prepare("
@@ -198,6 +198,9 @@ class EMQM_Mail_Queue
         // giới hạn thời gian cho vòng lặp không quá 55 giây
         $time_limit = time() + 55;
 
+        // thiết lập timeout
+        set_time_limit(60);
+
         // Initialize counters
         $count = 0;
         foreach ($emails as $email) {
@@ -214,7 +217,7 @@ class EMQM_Mail_Queue
             $count++;
 
             // Thêm sleep để tránh quá tải server, có thể điều chỉnh theo nhu cầu
-            // sleep(1);
+            sleep(1);
         }
 
         // Re-add our hook

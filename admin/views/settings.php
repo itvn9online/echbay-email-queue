@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
                     <label for="emqm_batch_size"><?php _e('Batch Size', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>
-                    <input type="number" id="emqm_batch_size" name="emqm_batch_size" value="<?php echo esc_attr(get_option('emqm_batch_size', 20)); ?>" min="1" max="100" />
+                    <input type="number" id="emqm_batch_size" name="emqm_batch_size" value="<?php echo esc_attr(get_option('emqm_batch_size', 5)); ?>" min="1" max="100" />
                     <p class="description"><?php _e('Number of emails to process in each batch. Higher values may cause performance issues.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>
