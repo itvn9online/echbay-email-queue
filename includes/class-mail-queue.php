@@ -174,8 +174,14 @@ class EMQM_Mail_Queue
                 SELECT * FROM {$this->table_name} 
                 WHERE id = %d
             ", intval($_GET['emqm_id'])));
+            $batch_size = 1;
         } else {
             $batch_size = get_option('emqm_batch_size', 5);
+            if ($batch_size < 1) {
+                $batch_size = 1;
+            } elseif ($batch_size > 33) {
+                $batch_size = 33;
+            }
 
             // Get pending emails ordered by priority and created date
             $emails = $wpdb->get_results($wpdb->prepare("
