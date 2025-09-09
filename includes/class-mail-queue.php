@@ -353,9 +353,99 @@ class EMQM_Mail_Queue
 
         $stats = array();
 
-        $stats['pending'] = $wpdb->get_var($wpdb->prepare("SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s", 'pending'));
-        $stats['sent'] = $wpdb->get_var($wpdb->prepare("SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s", 'sent'));
-        $stats['failed'] = $wpdb->get_var($wpdb->prepare("SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s", 'failed'));
+        $stats['pending'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
+            'pending'
+        ));
+
+        $stats['sent'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
+            'sent'
+        ));
+
+        // Hôm nay
+        $hom_nay = date('Y-m-d') . ' 00:00:00';
+        // echo $hom_nay . '<br>' . PHP_EOL;
+        $stats['sent_today'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s",
+            'sent',
+            $hom_nay
+        ));
+
+        // Cache cho sent_yesterday (không thay đổi nữa)
+        $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+        $cache_key_yesterday = 'emqm_sent_yesterday_' . $yesterday_date;
+        $stats['sent_yesterday'] = get_transient($cache_key_yesterday);
+        if ($stats['sent_yesterday'] === false) {
+            $stats['sent_yesterday'] = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s AND sent_at < %s",
+                'sent',
+                $yesterday_date . ' 00:00:00',
+                $hom_nay
+            ));
+            // Cache cho 24 giờ
+            set_transient($cache_key_yesterday, $stats['sent_yesterday'], DAY_IN_SECONDS);
+        }
+
+        // Calculate this week (Monday to Sunday)
+        $thu_2 = strtotime('monday this week');
+        // echo $thu_2 . '<br>' . PHP_EOL;
+        // echo date('Y-m-d', $thu_2) . '<br>' . PHP_EOL;
+        // echo date('Y-m-d', $thu_2 - (24 * 3600 * 7)) . '<br>' . PHP_EOL;
+        //
+        $monday_this_week = date('Y-m-d', $thu_2) . ' 00:00:00';
+        $stats['sent_this_week'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s",
+            'sent',
+            $monday_this_week
+        ));
+
+        // Calculate last week (Monday to Sunday)
+        $monday_last_week = date('Y-m-d', $thu_2 - (24 * 3600 * 7)) . ' 00:00:00';
+
+        // Cache cho sent_last_week (không thay đổi nữa)
+        $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+        $cache_key_last_week = 'emqm_sent_last_week_' . $last_week_key;
+        $stats['sent_last_week'] = get_transient($cache_key_last_week);
+        if ($stats['sent_last_week'] === false) {
+            $stats['sent_last_week'] = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s AND sent_at < %s",
+                'sent',
+                $monday_last_week,
+                $monday_this_week
+            ));
+            // Cache cho 24 giờ
+            set_transient($cache_key_last_week, $stats['sent_last_week'], DAY_IN_SECONDS);
+        }
+
+        // Tháng này
+        $thang_nay = date('Y-m') . '-01 00:00:00';
+        // echo $thang_nay . '<br>' . PHP_EOL;
+        $stats['sent_this_month'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at > %s",
+            'sent',
+            $thang_nay
+        ));
+
+        // Cache cho sent_last_month (không thay đổi nữa)
+        $last_month_date = date('Y-m', strtotime('-1 month'));
+        $cache_key_last_month = 'emqm_sent_last_month_' . $last_month_date;
+        $stats['sent_last_month'] = get_transient($cache_key_last_month);
+        if ($stats['sent_last_month'] === false) {
+            $stats['sent_last_month'] = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at > %s AND sent_at < %s",
+                'sent',
+                $last_month_date . "-01 00:00:00",
+                $thang_nay
+            ));
+            // Cache cho 24 giờ
+            set_transient($cache_key_last_month, $stats['sent_last_month'], DAY_IN_SECONDS);
+        }
+
+        $stats['failed'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
+            'failed'
+        ));
         $stats['total'] = $wpdb->get_var("SELECT COUNT(id) FROM {$this->table_name}");
 
         return $stats;
@@ -368,7 +458,7 @@ class EMQM_Mail_Queue
     {
         global $wpdb;
 
-        $days = get_option('emqm_delete_sent_after_days', 30);
+        $days = get_option('emqm_delete_sent_after_days', 365);
 
         if ($days > 0) {
             $wpdb->query($wpdb->prepare("
@@ -399,6 +489,48 @@ class EMQM_Mail_Queue
 
         if ($this->enable_logging) {
             error_log('EMQM: Cleaned up duplicate emails');
+        }
+    }
+
+    /**
+     * Clear statistics cache (useful when manually updating sent_at dates)
+     */
+    public function clear_stats_cache($date_range = 'all')
+    {
+        switch ($date_range) {
+            case 'yesterday':
+                $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+                delete_transient('emqm_sent_yesterday_' . $yesterday_date);
+                break;
+
+            case 'last_week':
+                $thu_2 = strtotime('monday this week');
+                $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+                delete_transient('emqm_sent_last_week_' . $last_week_key);
+                break;
+
+            case 'last_month':
+                $last_month_date = date('Y-m', strtotime('-1 month'));
+                delete_transient('emqm_sent_last_month_' . $last_month_date);
+                break;
+
+            case 'all':
+            default:
+                // Clear all cached stats
+                $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+                delete_transient('emqm_sent_yesterday_' . $yesterday_date);
+
+                $thu_2 = strtotime('monday this week');
+                $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+                delete_transient('emqm_sent_last_week_' . $last_week_key);
+
+                $last_month_date = date('Y-m', strtotime('-1 month'));
+                delete_transient('emqm_sent_last_month_' . $last_month_date);
+                break;
+        }
+
+        if ($this->enable_logging) {
+            error_log('EMQM: Cleared stats cache for: ' . $date_range);
         }
     }
 }

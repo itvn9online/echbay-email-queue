@@ -76,7 +76,7 @@ if (!defined('ABSPATH')) {
                     <label for="emqm_delete_sent_after_days"><?php _e('Delete Sent Emails After (days)', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>
-                    <input type="number" id="emqm_delete_sent_after_days" name="emqm_delete_sent_after_days" value="<?php echo esc_attr(get_option('emqm_delete_sent_after_days', 30)); ?>" min="0" max="365" />
+                    <input type="number" id="emqm_delete_sent_after_days" name="emqm_delete_sent_after_days" value="<?php echo esc_attr(get_option('emqm_delete_sent_after_days', 365)); ?>" min="0" max="365" />
                     <p class="description"><?php _e('Automatically delete sent emails after this many days. Set to 0 to keep all emails.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>

@@ -32,6 +32,32 @@ $cron_send_url = str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH) . 
             <div class="stat-label"><?php _e('Total', 'echbay-mail-queue'); ?></div>
         </div>
     </div>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_today']); ?></div>
+            <div class="stat-label"><?php _e('Sent Today', 'echbay-mail-queue'); ?></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_yesterday']); ?></div>
+            <div class="stat-label"><?php _e('Sent Yesterday', 'echbay-mail-queue'); ?></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_this_week']); ?></div>
+            <div class="stat-label"><?php _e('Sent This Week', 'echbay-mail-queue'); ?></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_last_week']); ?></div>
+            <div class="stat-label"><?php _e('Sent Last Week', 'echbay-mail-queue'); ?></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_this_month']); ?></div>
+            <div class="stat-label"><?php _e('Sent This Month', 'echbay-mail-queue'); ?></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number"><?php echo number_format($stats['sent_last_month']); ?></div>
+            <div class="stat-label"><?php _e('Sent Last Month', 'echbay-mail-queue'); ?></div>
+        </div>
+    </div>
 </div>
 
 <div class="emqm-filters">
