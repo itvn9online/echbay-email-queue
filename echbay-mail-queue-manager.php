@@ -4,7 +4,7 @@
  * Plugin Name: Echbay Mail Queue Manager
  * Plugin URI: https://echbay.com
  * Description: Quản lý hàng đợi email cho WordPress, tránh làm chậm website khi gửi mail, hỗ trợ gửi theo batch qua cron.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Dao Quoc Dai
  * License: GPL2
  * Text Domain: echbay-mail-queue
@@ -62,7 +62,7 @@ add_action('init', 'emqm_load_textdomain');
 // Add settings link to plugin action links
 function emqm_add_settings_link($links)
 {
-    $settings_link = '<a href="' . admin_url('options-general.php?page=echbay-mail-queue') . '">' . __('Settings', 'echbay-mail-queue') . '</a>';
+    $settings_link = '<a href="' . admin_url('tools.php?page=echbay-mail-queue') . '">' . __('Settings', 'echbay-mail-queue') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 }

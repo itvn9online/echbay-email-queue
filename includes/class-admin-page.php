@@ -44,7 +44,7 @@ class EMQM_Admin_Page
      */
     public function add_admin_menu()
     {
-        add_options_page(
+        add_management_page(
             __('Email Queue Manager', 'echbay-mail-queue'),
             __('Email Queue', 'echbay-mail-queue'),
             'manage_options',
@@ -76,7 +76,7 @@ class EMQM_Admin_Page
      */
     public function enqueue_admin_scripts($hook)
     {
-        if ($hook != 'settings_page_echbay-mail-queue') {
+        if ($hook != 'tools_page_echbay-mail-queue') {
             return;
         }
 

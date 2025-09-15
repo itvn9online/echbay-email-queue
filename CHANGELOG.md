@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.1] - 2025-09-15
+
+### Changed
+
+- **Admin Menu Location**: Moved plugin menu from Settings to Tools section
+- **Menu Function**: Changed from `add_options_page()` to `add_management_page()`
+- **Hook Reference**: Updated script enqueue hook from `settings_page_echbay-mail-queue` to `tools_page_echbay-mail-queue`
+
+### Technical Details
+
+- Plugin menu now appears under "Tools" instead of "Settings" in WordPress admin
+- More appropriate location since this is primarily a management/maintenance tool
+- Maintains same functionality and permissions (`manage_options` capability)
+- Updated admin script loading to match new page hook
+
+### Benefits
+
+- **Better Organization**: Tools menu is more appropriate for queue management functionality
+- **User Experience**: More intuitive location for email queue operations
+- **Consistency**: Aligns with WordPress admin menu conventions for utility tools
+
+### Menu Path
+
+- **Before**: Settings → Email Queue
+- **After**: Tools → Email Queue
+
 ## [1.2.0] - 2025-09-04
 
 ### Added
