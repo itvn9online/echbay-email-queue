@@ -20,7 +20,7 @@ define('EMQM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EMQM_PLUGIN_PATH', __DIR__ . '/');
 define('EMQM_VERSION', file_get_contents(__DIR__ . '/VERSION'));
 // dùng để xác định bản ghi trùng lặp
-define('EMQM_FIXED_TIME', date('Y-m-d H:i:s'));
+define('EMQM_FIXED_TIME', date_i18n('Y-m-d H:i:s'));
 
 // Include required files
 require_once EMQM_PLUGIN_PATH . 'includes/class-activator.php';

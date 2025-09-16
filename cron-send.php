@@ -42,7 +42,7 @@ if (!isset($_GET['emqm_id'])) {
             if (time() - $failed_email_time < 600) {
                 echo json_encode(array(
                     'success' => false,
-                    'message' => 'Failed email limit reached with ' . $failed_email_count . ' attempts in ' . date('Y-m-d H:i:s', $failed_email_time) . '. Please try again later.',
+                    'message' => 'Failed email limit reached with ' . $failed_email_count . ' attempts in ' . date_i18n('Y-m-d H:i:s', $failed_email_time) . '. Please try again later.',
                 ));
                 exit();
             }

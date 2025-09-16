@@ -123,7 +123,7 @@ class EMQM_Auto_Updater
             'requires' => '5.0',
             'tested' => get_bloginfo('version'),
             'requires_php' => '7.4',
-            'last_updated' => date('Y-m-d H:i:s'),
+            'last_updated' => date_i18n('Y-m-d H:i:s'),
             'upgrade_notice' => 'Phiên bản mới có sẵn. Vui lòng cập nhật để nhận các tính năng và sửa lỗi mới nhất.'
         );
 
