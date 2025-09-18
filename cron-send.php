@@ -163,7 +163,7 @@ try {
 
         // Check daily email limit if set
         if ($my_daily_email_limit > 0) {
-            // thêm prefix theo domain để chạy multiple site
+            // thêm prefix theo domain để chạy multiple domain trên cùng 1 source
             $domain_prefix = explode(':', $_SERVER['HTTP_HOST'])[0] . '_';
             $path_daily_limit = __DIR__ . '/' . $domain_prefix . 'daily_limit-' . date_i18n('Y-m-d') . '.log';
             if (is_file($path_daily_limit)) {
