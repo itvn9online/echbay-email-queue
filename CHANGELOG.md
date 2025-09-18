@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.2.2] - 2025-09-18
+
+### Added
+
+- **Daily Email Limit Setting**: New option to limit maximum emails sent per day
+- **Free Email Service Support**: Useful for Gmail, Yahoo, and other free services with daily sending limits
+- **Smart Rate Limiting**: Foundation for intelligent email sending based on service limits
+
+### Technical Details
+
+- **New Option**: `emqm_daily_email_limit` with default value 0 (unlimited)
+- **Input Range**: 0 to 10,000 emails per day
+- **Form Integration**: Added to settings page with proper validation
+- **Option Registration**: Registered in WordPress settings system
+
+### Settings Interface
+
+- **Field Name**: "Daily Email Limit"
+- **Description**: "Maximum number of emails to send per day. Set to 0 for unlimited. Useful for free email services with daily limits (e.g., Gmail: 500/day)."
+- **Input Type**: Number input with min=0, max=10000
+- **Default Value**: 0 (unlimited)
+
+### Common Email Service Limits
+
+Examples for reference:
+
+- **Gmail**: ~500 emails/day for free accounts
+- **Yahoo Mail**: ~500 emails/day
+- **Outlook.com**: ~300 emails/day
+- **Custom SMTP**: Varies by provider
+
+### Future Implementation
+
+This setting establishes the foundation for:
+
+- Daily sending quota enforcement
+- Rate limiting based on time windows
+- Service-specific limit configurations
+- Automatic queue throttling
+
 ## [1.2.1] - 2025-09-15
 
 ### Changed

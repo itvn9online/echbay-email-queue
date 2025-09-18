@@ -83,6 +83,16 @@ if (!defined('ABSPATH')) {
 
             <tr>
                 <th scope="row">
+                    <label for="emqm_daily_email_limit"><?php _e('Daily Email Limit', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <input type="number" id="emqm_daily_email_limit" name="emqm_daily_email_limit" value="<?php echo esc_attr(get_option('emqm_daily_email_limit', 0)); ?>" min="0" max="10000" />
+                    <p class="description"><?php _e('Maximum number of emails to send per day. Set to 0 for unlimited. Useful for free email services with daily limits (e.g., Gmail: 500/day).', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
                     <label for="emqm_use_wp_cron"><?php _e('Use WP Cron', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>

@@ -23,6 +23,7 @@ $options = array(
     'emqm_enable_logging',
     'emqm_max_attempts',
     'emqm_delete_sent_after_days',
+    'emqm_daily_email_limit',
     'emqm_use_wp_cron',
     'emqm_last_cron_run'
 );
