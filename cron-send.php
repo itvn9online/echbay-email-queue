@@ -10,12 +10,66 @@ header('Content-Type: application/json');
 
 // Simple rate limiting to prevent abuse
 $last_run_option = __DIR__ . '/emqm_last_cron_run.txt';
+// xử lý để cùng 1 thời điểm chỉ có 1 cron được chạy, cron sau chờ cron trước xong mới thực hiện lệnh process_queue
+$lock_file = __DIR__ . '/emqm_cron_lock.txt';
 $current_time = time();
+
+// Process lock mechanism - chỉ cho phép 1 cron chạy cùng lúc
 if (!isset($_GET['emqm_id'])) {
+    // Random delay để phân tán thời gian check lock, tránh race condition
+    // 0.5-5 giây là đủ cho việc phân tán mà không delay quá lâu
+    usleep(mt_rand(500000, 5000000)); // 0.5-5 giây
+
+    // Kiểm tra xem có cron nào đang chạy không
+    if (is_file($lock_file)) {
+        $lock_time = (int) file_get_contents($lock_file);
+        $lock_timeout = 120; // Timeout sau 2 phút nếu lock bị stuck
+
+        // Nếu lock file quá cũ (stuck process), xóa nó
+        if (($current_time - $lock_time) > $lock_timeout) {
+            unlink($lock_file);
+        } else {
+            // Có cron khác đang chạy, chờ hoặc exit
+            $wait_attempts = 0;
+            $max_wait_attempts = 25; // Chờ tối đa 25 lần x 2 giây = 50 giây
+
+            while (is_file($lock_file) && $wait_attempts < $max_wait_attempts) {
+                sleep(2); // Chờ 2 giây
+                $wait_attempts++;
+
+                // Kiểm tra lại timeout
+                if (is_file($lock_file)) {
+                    $lock_time = (int) file_get_contents($lock_file);
+                    if (($current_time - $lock_time) > $lock_timeout) {
+                        unlink($lock_file);
+                        break;
+                    }
+                }
+            }
+
+            // Nếu vẫn còn lock sau khi chờ, exit
+            if (is_file($lock_file)) {
+                echo json_encode(array(
+                    'success' => false,
+                    'message' => 'Another cron process is running. Please wait.',
+                ));
+                exit();
+            }
+        }
+    }
+
+    // Tạo lock file
+    file_put_contents($lock_file, $current_time, LOCK_EX);
+
     $last_run = is_file($last_run_option) ? (int) file_get_contents($last_run_option) : 0;
     $min_interval = 55; // Minimum 55 seconds between runs
 
     if (($current_time - $last_run) < $min_interval) {
+        // Xóa lock trước khi exit
+        if (is_file($lock_file)) {
+            unlink($lock_file);
+        }
+
         echo json_encode(array(
             'success' => false,
             'message' => 'Rate limited',
@@ -109,9 +163,6 @@ try {
 
         // Check daily email limit if set
         if ($my_daily_email_limit > 0) {
-            // sử dụng mt_rand cho random tốt hơn và giới hạn sleep time hợp lý hơn (1-9 giây)
-            usleep(mt_rand(1000000, 9000000));
-
             // thêm prefix theo domain để chạy multiple site
             $domain_prefix = explode(':', $_SERVER['HTTP_HOST'])[0] . '_';
             $path_daily_limit = __DIR__ . '/' . $domain_prefix . 'daily_limit-' . date_i18n('Y-m-d') . '.log';
@@ -131,8 +182,6 @@ try {
             }
         }
 
-        // xử lý để cùng 1 thời điểm chỉ có 1 cron được chạy, cron sau chờ cron trước xong mới thực hiện lệnh process_queue
-
         // Process the email queue
         $mail_queue = new EMQM_Mail_Queue(true);
         $processed = $mail_queue->process_queue();
@@ -143,9 +192,16 @@ try {
             file_put_contents($path_daily_limit, $emails_sent_today, LOCK_EX);
         }
 
-        // Clean up last run file
+        // Clean up files
         if (!isset($_GET['emqm_id'])) {
-            unlink($last_run_option);
+            // Remove last run file
+            if (is_file($last_run_option)) {
+                unlink($last_run_option);
+            }
+            // Remove lock file
+            if (is_file($lock_file)) {
+                unlink($lock_file);
+            }
         }
     } else {
         $processed = -1;
@@ -177,6 +233,11 @@ try {
         'timestamp' => $current_time
     ));
 } catch (Exception $e) {
+    // Clean up lock file in case of error
+    if (!isset($_GET['emqm_id']) && is_file($lock_file)) {
+        unlink($lock_file);
+    }
+
     if (get_option('emqm_enable_logging', 0) > 0) {
         error_log('EMQM Cron Error: ' . $e->getMessage());
     }

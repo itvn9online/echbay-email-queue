@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.2.3] - 2025-09-19
+
+### Added
+
+- **Cron Process Locking**: Implemented file-based lock mechanism to ensure only one cron process runs at a time
+- **Smart Wait System**: Second cron process waits for first to complete instead of failing immediately
+- **Lock Timeout Protection**: Automatic cleanup of stuck lock files after 2 minutes
+- **Comprehensive Cleanup**: Lock files properly cleaned up on success, error, and timeout
+
+### Technical Details
+
+- **Lock File**: `emqm_cron_lock.txt` stores timestamp of running process
+- **Wait Mechanism**: Up to 30 attempts × 2 seconds = 60 seconds maximum wait time
+- **Timeout Handling**: Lock files older than 120 seconds are automatically removed
+- **Error Handling**: Lock cleanup in exception handlers prevents stuck locks
+
+### Process Flow
+
+1. **Check Existing Lock**: If lock file exists and is recent, wait for completion
+2. **Create Lock**: Set lock file with current timestamp before processing
+3. **Wait Logic**: Second process waits up to 60 seconds for first to complete
+4. **Cleanup**: Lock file removed on successful completion, error, or timeout
+
+### Benefits
+
+- **No Race Conditions**: Prevents multiple cron jobs from processing same emails
+- **Resource Protection**: Avoids server overload from concurrent email processing
+- **Data Integrity**: Ensures consistent email queue state
+- **Graceful Handling**: Second process waits instead of failing immediately
+
+### Lock File Behavior
+
+- **Created**: When cron starts processing (if no `emqm_id` parameter)
+- **Contains**: Unix timestamp of process start
+- **Timeout**: 120 seconds (2 minutes)
+- **Cleanup**: Automatic on completion, error, or timeout
+
 ## [1.2.2] - 2025-09-18
 
 ### Added
