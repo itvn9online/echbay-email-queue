@@ -13,6 +13,7 @@ $last_run_option = __DIR__ . '/emqm_last_cron_run.txt';
 // xử lý để cùng 1 thời điểm chỉ có 1 cron được chạy, cron sau chờ cron trước xong mới thực hiện lệnh process_queue
 $lock_file = __DIR__ . '/emqm_cron_lock.txt';
 $current_time = time();
+// $current_hour = null;
 // thêm prefix theo domain để chạy multiple domain trên cùng 1 source
 $domain_prefix = explode(':', $_SERVER['HTTP_HOST'])[0] . '_';
 // mặc là không giới hạn số lượng email gửi đi mỗi ngày
@@ -24,7 +25,30 @@ $path_daily_limit = __DIR__ . '/' . $domain_prefix . 'daily_limit-' . date('Y-m-
 if (!isset($_GET['emqm_id'])) {
     // nếu có file settings_cron.php thì lấy giới hạn từ file này
     if (is_file(__DIR__ . '/settings_cron.php')) {
+        $my_active_hour_start = 0;
+        $my_active_hour_end = 0;
+        $my_default_timezone = '';
         include __DIR__ . '/settings_cron.php';
+
+        // Set timezone if specified
+        if ($my_active_hour_start > 0 || $my_active_hour_end > 0) {
+            if ($my_default_timezone != '') {
+                date_default_timezone_set($my_default_timezone);
+                // xác định giờ hiện tại theo timezone đã set
+                $current_time = time();
+
+                // kiểm tra nếu giờ hiện tại không nằm trong khung giờ hoạt động thì thoát
+                $current_hour = (int) date('H', $current_time);
+                if ($my_active_hour_start < $current_hour || $my_active_hour_end > $current_hour) {
+                    echo json_encode(array(
+                        'success' => false,
+                        'timezone' => $my_default_timezone,
+                        'message' => 'Current hour: ' . $current_hour . ' Outside active hours (' . $my_active_hour_start . '-' . $my_active_hour_end . ')',
+                    ));
+                    exit();
+                }
+            }
+        }
 
         // Check daily email limit if set
         if ($my_daily_email_limit > 0) {
@@ -156,6 +180,8 @@ try {
             // nếu không có file settings thì lấy giới hạn từ option và tạo file settings
             // để tránh việc đọc option nhiều lần
             $my_daily_email_limit = get_option('emqm_daily_email_limit', 0);
+            $my_active_hour_start = get_option('emqm_active_hour_start', 0);
+            $my_active_hour_end = get_option('emqm_active_hour_end', 0);
             // Lấy timezone từ cài đặt WordPress
             $timezone = get_option('timezone_string');
             if (empty($timezone)) {
@@ -171,6 +197,8 @@ try {
                     '// Generated on ' . date('Y-m-d H:i:s'),
                     '// Generated in ' . $_SERVER['REQUEST_URI'],
                     '$my_daily_email_limit = ' . intval($my_daily_email_limit) . ';',
+                    '$my_active_hour_start = ' . intval($my_active_hour_start) . ';',
+                    '$my_active_hour_end = ' . intval($my_active_hour_end) . ';',
                     '$my_default_timezone = \'' . $timezone . '\';',
                 ]
             ), LOCK_EX);
@@ -221,6 +249,7 @@ try {
         'message' => 'Queue processed successfully',
         'processed' => $processed,
         // 'timestamp' => $current_time,
+        // 'current_hour' => $current_hour,
         'sent' => $emails_sent_today . '/' . $my_daily_email_limit,
     ));
 } catch (Exception $e) {

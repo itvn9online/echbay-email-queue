@@ -66,6 +66,8 @@ class EMQM_Admin_Page
         register_setting('emqm_settings', 'emqm_max_attempts');
         register_setting('emqm_settings', 'emqm_delete_sent_after_days');
         register_setting('emqm_settings', 'emqm_daily_email_limit');
+        register_setting('emqm_settings', 'emqm_active_hour_start');
+        register_setting('emqm_settings', 'emqm_active_hour_end');
         register_setting('emqm_settings', 'emqm_use_wp_cron');
         register_setting('emqm_settings', 'emqm_prevent_duplicates');
         register_setting('emqm_settings', 'emqm_admin_autorun');
@@ -169,6 +171,8 @@ class EMQM_Admin_Page
             update_option('emqm_max_attempts', absint($_POST['emqm_max_attempts']));
             update_option('emqm_delete_sent_after_days', absint($_POST['emqm_delete_sent_after_days']));
             update_option('emqm_daily_email_limit', absint($_POST['emqm_daily_email_limit']));
+            update_option('emqm_active_hour_start', absint($_POST['emqm_active_hour_start']));
+            update_option('emqm_active_hour_end', absint($_POST['emqm_active_hour_end']));
             update_option('emqm_use_wp_cron', isset($_POST['emqm_use_wp_cron']) ? 1 : 0);
             update_option('emqm_prevent_duplicates', isset($_POST['emqm_prevent_duplicates']) ? 1 : 0);
             update_option('emqm_admin_autorun', isset($_POST['emqm_admin_autorun']) ? 1 : 0);

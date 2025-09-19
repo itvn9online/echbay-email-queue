@@ -93,6 +93,36 @@ if (!defined('ABSPATH')) {
 
             <tr>
                 <th scope="row">
+                    <label for="emqm_active_hour_start"><?php _e('Active Hour Start', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <select id="emqm_active_hour_start" name="emqm_active_hour_start">
+                        <option value="0" <?php selected(get_option('emqm_active_hour_start', 0), 0); ?>><?php _e('00:00 (Midnight)', 'echbay-mail-queue'); ?></option>
+                        <?php for ($i = 1; $i < 24; $i++): ?>
+                            <option value="<?php echo $i; ?>" <?php selected(get_option('emqm_active_hour_start', 0), $i); ?>><?php echo sprintf('%02d:00', $i); ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <p class="description"><?php _e('Hour when cronjob should start processing emails (24-hour format). Set to 0 for no time restriction.', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="emqm_active_hour_end"><?php _e('Active Hour End', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <select id="emqm_active_hour_end" name="emqm_active_hour_end">
+                        <option value="0" <?php selected(get_option('emqm_active_hour_end', 0), 0); ?>><?php _e('00:00 (Midnight)', 'echbay-mail-queue'); ?></option>
+                        <?php for ($i = 1; $i < 24; $i++): ?>
+                            <option value="<?php echo $i; ?>" <?php selected(get_option('emqm_active_hour_end', 0), $i); ?>><?php echo sprintf('%02d:00', $i); ?></option>
+                        <?php endfor; ?>
+                    </select>
+                    <p class="description"><?php _e('Hour when cronjob should stop processing emails (24-hour format). Set to 0 for no time restriction.', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
                     <label for="emqm_use_wp_cron"><?php _e('Use WP Cron', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>
