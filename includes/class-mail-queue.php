@@ -163,7 +163,7 @@ class EMQM_Mail_Queue
     /**
      * Process email queue
      */
-    public function process_queue()
+    public function process_queue($file_count_failed = '')
     {
         // Process email queue
         global $wpdb;
@@ -216,7 +216,7 @@ class EMQM_Mail_Queue
             }
 
             // 
-            if (!$this->send_email($email)) {
+            if (!$this->send_email($email, $file_count_failed)) {
                 // Handle failed email -> gửi lỗi thì out luôn thôi
                 break;
             }
@@ -235,7 +235,7 @@ class EMQM_Mail_Queue
     /**
      * Send individual email
      */
-    private function send_email($email)
+    private function send_email($email, $file_count_failed = '')
     {
         global $wpdb;
 
@@ -258,7 +258,9 @@ class EMQM_Mail_Queue
         $sent = wp_mail($to, $subject, $message, $headers);
 
         // tạo file log để tính số lần gửi mail thất bại
-        $file_count_failed = EMQM_PLUGIN_PATH . 'failed_email_count.log';
+        if ($file_count_failed == '') {
+            $file_count_failed = EMQM_PLUGIN_PATH . explode(':', $_SERVER['HTTP_HOST'])[0] . '_' . 'failed_email_count.log';
+        }
 
         if ($sent) {
             // Mark as sent
