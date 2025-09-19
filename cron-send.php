@@ -8,6 +8,20 @@
 // Set the content type to JSON
 header('Content-Type: application/json');
 
+// Nạp settings nếu có, để tránh các hàm thời gian bị gọi sai lệch
+$my_active_hour_start = 0;
+$my_active_hour_end = 0;
+$my_default_timezone = '';
+// mặc là không giới hạn số lượng email gửi đi mỗi ngày
+$my_daily_email_limit = 0;
+// Include settings if exists
+if (is_file(__DIR__ . '/settings_cron.php')) {
+    include __DIR__ . '/settings_cron.php';
+    if ($my_default_timezone != '') {
+        date_default_timezone_set($my_default_timezone);
+    }
+}
+
 // Simple rate limiting to prevent abuse
 $last_run_option = __DIR__ . '/emqm_last_cron_run.txt';
 // xử lý để cùng 1 thời điểm chỉ có 1 cron được chạy, cron sau chờ cron trước xong mới thực hiện lệnh process_queue
@@ -16,54 +30,40 @@ $current_time = time();
 // $current_hour = null;
 // thêm prefix theo domain để chạy multiple domain trên cùng 1 source
 $domain_prefix = explode(':', $_SERVER['HTTP_HOST'])[0] . '_';
-// mặc là không giới hạn số lượng email gửi đi mỗi ngày
-$my_daily_email_limit = 0;
 $emails_sent_today = 0;
 $path_daily_limit = __DIR__ . '/' . $domain_prefix . 'daily_limit-' . date('Y-m-d') . '.log';
 
 // Process lock mechanism - chỉ cho phép 1 cron chạy cùng lúc
 if (!isset($_GET['emqm_id'])) {
-    // nếu có file settings_cron.php thì lấy giới hạn từ file này
-    if (is_file(__DIR__ . '/settings_cron.php')) {
-        $my_active_hour_start = 0;
-        $my_active_hour_end = 0;
-        $my_default_timezone = '';
-        include __DIR__ . '/settings_cron.php';
-
-        // Set timezone if specified
+    // Set timezone if specified
+    if ($my_default_timezone != '') {
         if ($my_active_hour_start > 0 || $my_active_hour_end > 0) {
-            if ($my_default_timezone != '') {
-                date_default_timezone_set($my_default_timezone);
-                // xác định giờ hiện tại theo timezone đã set
-                $current_time = time();
-
-                // kiểm tra nếu giờ hiện tại không nằm trong khung giờ hoạt động thì thoát
-                $current_hour = (int) date('H', $current_time);
-                if ($my_active_hour_start < $current_hour || $my_active_hour_end > $current_hour) {
-                    echo json_encode(array(
-                        'success' => false,
-                        'timezone' => $my_default_timezone,
-                        'message' => 'Current hour: ' . $current_hour . ' Outside active hours (' . $my_active_hour_start . '-' . $my_active_hour_end . ')',
-                    ));
-                    exit();
-                }
-            }
-        }
-
-        // Check daily email limit if set
-        if ($my_daily_email_limit > 0) {
-            if (is_file($path_daily_limit)) {
-                $emails_sent_today = intval(file_get_contents($path_daily_limit));
-            }
-
-            // Check daily send limit
-            if ($emails_sent_today > $my_daily_email_limit) {
+            // kiểm tra nếu giờ hiện tại không nằm trong khung giờ hoạt động thì thoát
+            $current_hour = (int) date('H', $current_time);
+            if ($current_hour < $my_active_hour_start || $current_hour > $my_active_hour_end) {
                 echo json_encode(array(
                     'success' => false,
-                    'message' => 'Daily send limit exceeded. Emails sent today: ' . $emails_sent_today . '/' . $my_daily_email_limit,
+                    'timezone' => $my_default_timezone,
+                    'message' => 'Current hour: ' . $current_hour . ' Outside active hours (' . $my_active_hour_start . '-' . $my_active_hour_end . ')',
                 ));
                 exit();
             }
+        }
+    }
+
+    // Check daily email limit if set
+    if ($my_daily_email_limit > 0) {
+        if (is_file($path_daily_limit)) {
+            $emails_sent_today = intval(file_get_contents($path_daily_limit));
+        }
+
+        // Check daily send limit
+        if ($emails_sent_today > $my_daily_email_limit) {
+            echo json_encode(array(
+                'success' => false,
+                'message' => 'Daily send limit exceeded. Emails sent today: ' . $emails_sent_today . '/' . $my_daily_email_limit,
+            ));
+            exit();
         }
     }
 
