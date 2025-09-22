@@ -254,15 +254,15 @@ class EMQM_Mail_Queue
         // $attachments = maybe_unserialize($email->attachments);
 
         // Check email method and send accordingly
-        $mail_method = get_option('emqm_mail_method', 'wp_mail');
+        if (!class_exists('EMQM_Gmail_API')) {
+            require_once EMQM_PLUGIN_PATH . 'includes/class-gmail-api.php';
+        }
+        $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
+        $mail_method = get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail');
         $sent = false;
 
         if ($mail_method === 'gmail_api') {
             // Use Gmail API
-            if (!class_exists('EMQM_Gmail_API')) {
-                require_once EMQM_PLUGIN_PATH . 'includes/class-gmail-api.php';
-            }
-
             $gmail_api = new EMQM_Gmail_API();
             if ($gmail_api->is_configured()) {
                 $sent = $gmail_api->send_email($to, $subject, $message, $headers);

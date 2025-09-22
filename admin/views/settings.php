@@ -7,6 +7,10 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Get domain prefix for Gmail API options
+require_once EMQM_PLUGIN_PATH . 'includes/class-gmail-api.php';
+$gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
 ?>
 
 <form method="post" action="">
@@ -127,14 +131,14 @@ if (!defined('ABSPATH')) {
                 </th>
                 <td>
                     <select id="emqm_mail_method" name="emqm_mail_method">
-                        <option value="wp_mail" <?php selected(get_option('emqm_mail_method', 'wp_mail'), 'wp_mail'); ?>><?php _e('WordPress wp_mail()', 'echbay-mail-queue'); ?></option>
-                        <option value="gmail_api" <?php selected(get_option('emqm_mail_method', 'wp_mail'), 'gmail_api'); ?>><?php _e('Gmail API', 'echbay-mail-queue'); ?></option>
+                        <option value="wp_mail"><?php _e('WordPress wp_mail()', 'echbay-mail-queue'); ?></option>
+                        <option value="gmail_api" <?php selected(get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail'), 'gmail_api'); ?>><?php _e('Gmail API', 'echbay-mail-queue'); ?></option>
                     </select>
                     <p class="description"><?php _e('Choose email sending method. Gmail API provides better deliverability and detailed tracking.', 'echbay-mail-queue'); ?></p>
                 </td>
             </tr>
 
-            <tr id="gmail_api_settings" style="display: <?php echo get_option('emqm_mail_method', 'wp_mail') === 'gmail_api' ? 'table-row' : 'none'; ?>;">
+            <tr id="gmail_api_settings" style="display: <?php echo get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail') === 'gmail_api' ? 'table-row' : 'none'; ?>;">
                 <th scope="row">
                     <label><?php _e('Gmail API Settings', 'echbay-mail-queue'); ?></label>
                 </th>
@@ -145,7 +149,7 @@ if (!defined('ABSPATH')) {
                                 <label for="emqm_gmail_client_id"><?php _e('Client ID', 'echbay-mail-queue'); ?></label>
                             </th>
                             <td>
-                                <input type="text" id="emqm_gmail_client_id" name="emqm_gmail_client_id" value="<?php echo esc_attr(get_option('emqm_gmail_client_id', '')); ?>" style="width: 400px;" />
+                                <input type="text" id="emqm_gmail_client_id" name="emqm_gmail_client_id" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_client_id', '')); ?>" style="width: 400px;" />
                             </td>
                         </tr>
                         <tr>
@@ -153,7 +157,7 @@ if (!defined('ABSPATH')) {
                                 <label for="emqm_gmail_client_secret"><?php _e('Client Secret', 'echbay-mail-queue'); ?></label>
                             </th>
                             <td>
-                                <input type="password" id="emqm_gmail_client_secret" name="emqm_gmail_client_secret" value="<?php echo esc_attr(get_option('emqm_gmail_client_secret', '')); ?>" style="width: 400px;" />
+                                <input type="text" id="emqm_gmail_client_secret" name="emqm_gmail_client_secret" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_client_secret', '')); ?>" placeholder="Gmail client secret" style="width: 400px; color: transparent;" />
                             </td>
                         </tr>
                         <tr>
@@ -161,7 +165,7 @@ if (!defined('ABSPATH')) {
                                 <label for="emqm_gmail_refresh_token"><?php _e('Refresh Token', 'echbay-mail-queue'); ?></label>
                             </th>
                             <td>
-                                <input type="password" id="emqm_gmail_refresh_token" name="emqm_gmail_refresh_token" value="<?php echo esc_attr(get_option('emqm_gmail_refresh_token', '')); ?>" style="width: 400px;" />
+                                <input type="text" id="emqm_gmail_refresh_token" name="emqm_gmail_refresh_token" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_refresh_token', '')); ?>" placeholder="Gmail refresh token" style="width: 400px; color: transparent;" />
                             </td>
                         </tr>
                         <tr>
@@ -169,7 +173,7 @@ if (!defined('ABSPATH')) {
                                 <label for="emqm_gmail_from_email"><?php _e('From Email', 'echbay-mail-queue'); ?></label>
                             </th>
                             <td>
-                                <input type="email" id="emqm_gmail_from_email" name="emqm_gmail_from_email" value="<?php echo esc_attr(get_option('emqm_gmail_from_email', '')); ?>" style="width: 400px;" />
+                                <input type="email" id="emqm_gmail_from_email" name="emqm_gmail_from_email" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_from_email', '')); ?>" style="width: 400px;" />
                                 <p class="description"><?php _e('Email address that will appear as sender (must be authorized for your Gmail account)', 'echbay-mail-queue'); ?></p>
                             </td>
                         </tr>
@@ -178,12 +182,13 @@ if (!defined('ABSPATH')) {
                                 <label for="emqm_gmail_from_name"><?php _e('From Name', 'echbay-mail-queue'); ?></label>
                             </th>
                             <td>
-                                <input type="text" id="emqm_gmail_from_name" name="emqm_gmail_from_name" value="<?php echo esc_attr(get_option('emqm_gmail_from_name', '')); ?>" style="width: 400px;" />
+                                <input type="text" id="emqm_gmail_from_name" name="emqm_gmail_from_name" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_from_name', '')); ?>" style="width: 400px;" />
                                 <p class="description"><?php _e('Display name that will appear as sender', 'echbay-mail-queue'); ?></p>
                             </td>
                         </tr>
                     </table>
                     <p class="description">
+                        * Plugin này thường được sử dụng kèm với plugin `Mail Marketing Importer`. Nếu có sẵn rồi hãy <a href="<?php echo admin_url(); ?>tools.php?page=email-campaigns&google-workspace=true" style="font-weight: bold;" target="_blank">vào đây để kết nối Gmail API</a> sau đó copy dữ liệu qua bên này.<br><br>
                         <strong><?php _e('Setup Instructions:', 'echbay-mail-queue'); ?></strong><br>
                         1. Go to <a href="https://console.developers.google.com/" target="_blank">Google Cloud Console</a><br>
                         2. Create a new project or select existing one<br>
@@ -192,7 +197,7 @@ if (!defined('ABSPATH')) {
                         5. Use OAuth 2.0 Playground to get refresh token
                     </p>
                     <p>
-                        <button type="button" id="emqm-test-gmail" class="button" style="display: <?php echo get_option('emqm_mail_method', 'wp_mail') === 'gmail_api' ? 'inline-block' : 'none'; ?>;">
+                        <button type="button" id="emqm-test-gmail" class="button" style="display: inline-block;">
                             <?php _e('Test Gmail API Connection', 'echbay-mail-queue'); ?>
                         </button>
                         <span id="emqm-gmail-test-result" style="margin-left: 10px;"></span>
@@ -252,6 +257,10 @@ if (!defined('ABSPATH')) {
         </tbody>
     </table>
 
+    <?php submit_button(); ?>
+</form>
+
+<div>
     <div class="emqm-debug-info">
         <h3><?php _e('Debug Information', 'echbay-mail-queue'); ?></h3>
         <p>
@@ -289,9 +298,7 @@ if (!defined('ABSPATH')) {
         </code>
         <p><em><?php _e('This plugin no longer uses WordPress cron. Please use server cron for better reliability.', 'echbay-mail-queue'); ?></em></p>
     </div>
-
-    <?php submit_button(); ?>
-</form>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var form = document.querySelector('form');
@@ -303,15 +310,22 @@ if (!defined('ABSPATH')) {
         var testGmailBtn = document.getElementById('emqm-test-gmail');
 
         if (emailMethodSelect && gmailSettings) {
-            emailMethodSelect.addEventListener('change', function() {
-                if (this.value === 'gmail_api') {
+            // Initialize display based on current value
+            function updateGmailSettings() {
+                if (emailMethodSelect.value === 'gmail_api') {
                     gmailSettings.style.display = 'table-row';
                     if (testGmailBtn) testGmailBtn.style.display = 'inline-block';
                 } else {
                     gmailSettings.style.display = 'none';
                     if (testGmailBtn) testGmailBtn.style.display = 'none';
                 }
-            });
+            }
+
+            // Set initial state
+            updateGmailSettings();
+
+            // Handle change event
+            emailMethodSelect.addEventListener('change', updateGmailSettings);
         }
 
         // Handle Gmail API test
@@ -334,6 +348,12 @@ if (!defined('ABSPATH')) {
                     from_email: document.getElementById('emqm_gmail_from_email').value,
                     from_name: document.getElementById('emqm_gmail_from_name').value
                 };
+
+                // nếu có trường dữ liệu trống thì báo lỗi luôn
+                if (!data.client_id || !data.client_secret || !data.refresh_token || !data.from_email) {
+                    alert('Please fill in all required Gmail API fields.');
+                    return;
+                }
 
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', (typeof emqm_ajax !== 'undefined') ? emqm_ajax.ajaxurl : '/wp-admin/admin-ajax.php');

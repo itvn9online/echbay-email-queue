@@ -17,14 +17,16 @@ class EMQM_Gmail_API
     private $from_name;
     private $access_token;
     private $enable_logging;
+    private $domain_prefix;
 
     public function __construct()
     {
-        $this->client_id = get_option('emqm_gmail_client_id', '');
-        $this->client_secret = get_option('emqm_gmail_client_secret', '');
-        $this->refresh_token = get_option('emqm_gmail_refresh_token', '');
-        $this->from_email = get_option('emqm_gmail_from_email', '');
-        $this->from_name = get_option('emqm_gmail_from_name', '');
+        $this->domain_prefix = self::get_domain_prefix_static();
+        $this->client_id = get_option($this->domain_prefix . 'emqm_gmail_client_id', '');
+        $this->client_secret = get_option($this->domain_prefix . 'emqm_gmail_client_secret', '');
+        $this->refresh_token = get_option($this->domain_prefix . 'emqm_gmail_refresh_token', '');
+        $this->from_email = get_option($this->domain_prefix . 'emqm_gmail_from_email', '');
+        $this->from_name = get_option($this->domain_prefix . 'emqm_gmail_from_name', '');
         $this->enable_logging = get_option('emqm_enable_logging', 0) > 0 ? true : false;
     }
 
@@ -205,7 +207,7 @@ class EMQM_Gmail_API
     }
 
     /**
-     * Test Gmail API connection
+     * Test Gmail API connection by sending a test email
      */
     public function test_connection()
     {
@@ -224,38 +226,57 @@ class EMQM_Gmail_API
             );
         }
 
-        // Test by getting user profile
-        $url = 'https://gmail.googleapis.com/gmail/v1/users/me/profile';
-
-        $response = wp_remote_get($url, array(
-            'headers' => array(
-                'Authorization' => 'Bearer ' . $access_token
-            ),
-            'timeout' => 30
-        ));
-
-        if (is_wp_error($response)) {
+        // Get admin email for test
+        $admin_email = get_option('admin_email');
+        if (empty($admin_email)) {
             return array(
                 'success' => false,
-                'message' => 'Connection failed: ' . $response->get_error_message()
+                'message' => 'Admin email not configured'
             );
         }
 
-        $response_code = wp_remote_retrieve_response_code($response);
-        if ($response_code === 200) {
-            $body = wp_remote_retrieve_body($response);
-            $profile = json_decode($body, true);
+        // Prepare test email content
+        $test_subject = '[Test] Gmail API Connection - ' . get_bloginfo('name');
+        $test_message = 'This is a test email to verify Gmail API connection is working correctly.
 
+Sent from: ' . get_bloginfo('name') . '
+Sent at: ' . current_time('Y-m-d H:i:s') . '
+Domain: ' . $_SERVER['HTTP_HOST'] . '
+
+If you receive this email, your Gmail API configuration is working properly.';
+
+        // Try to send test email
+        $sent = $this->send_email($admin_email, $test_subject, $test_message);
+
+        if ($sent) {
             return array(
                 'success' => true,
-                'message' => 'Connection successful',
-                'email' => isset($profile['emailAddress']) ? $profile['emailAddress'] : 'Unknown'
+                'message' => 'Test email sent successfully',
+                'email' => $admin_email
+            );
+        } else {
+            return array(
+                'success' => false,
+                'message' => 'Failed to send test email'
             );
         }
+    }
 
-        return array(
-            'success' => false,
-            'message' => 'Connection failed with code: ' . $response_code
-        );
+    /**
+     * Get domain prefix for multi-domain support (static method for use by other classes)
+     */
+    public static function get_domain_prefix_static()
+    {
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        if (empty($host)) {
+            return '';
+        }
+
+        // Remove www. prefix and sanitize domain name
+        $domain = preg_replace('/^www\./', '', $host);
+        $domain = preg_replace('/[^a-zA-Z0-9\-\.]/', '', $domain);
+        $domain = str_replace('.', '_', $domain);
+
+        return $domain . '_';
     }
 }
