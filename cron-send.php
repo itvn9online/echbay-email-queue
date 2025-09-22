@@ -55,6 +55,18 @@ if (!isset($_GET['emqm_id'])) {
     if ($my_daily_email_limit > 0) {
         if (is_file($path_daily_limit)) {
             $emails_sent_today = intval(file_get_contents($path_daily_limit));
+
+            // cứ mỗi 50 email thì reset lại lock file để các domain khác có thể lên thay
+            if ($emails_sent_today > 0 && $emails_sent_today % 50 == 0 && is_file($lock_file)) {
+                unlink($lock_file);
+
+                // 
+                echo json_encode(array(
+                    'success' => false,
+                    'message' => $domain_prefix . ' Daily email limit reached: ' . $emails_sent_today . '/' . $my_daily_email_limit . '. Lock file removed for other domains.',
+                ));
+                exit();
+            }
         }
 
         // Check daily send limit
@@ -79,8 +91,8 @@ if (!isset($_GET['emqm_id'])) {
         // nếu nội dung file khác với domain_prefix hiện tại thì có cron khác đang chạy
         $lock_content =  file_get_contents($lock_file);
         if ($lock_content != $domain_prefix) {
-            // xem thời gian tạo file lock lâu chưa, dưới 10 phút thì coi như cron đang chạy
-            if ($current_time - filemtime($lock_file) < 600) {
+            // xem thời gian tạo file lock lâu chưa, dưới 5 phút thì coi như cron đang chạy
+            if ($current_time - filemtime($lock_file) < 300) {
                 // thoát để tránh xung đột
                 echo json_encode(array(
                     'success' => false,
@@ -121,6 +133,12 @@ if (!isset($_GET['emqm_id'])) {
     // 
     $file_count_failed = __DIR__ . '/' . $domain_prefix . 'failed_email_count.log';
     if (is_file($file_count_failed)) {
+        // Xóa file lock nếu tồn tại, để các tên miền khác lên thay
+        if (is_file($lock_file)) {
+            unlink($lock_file);
+        }
+
+        // Lấy số lần gửi thất bại
         $failed_email_count = intval(explode('|', file_get_contents($file_count_failed))[0]);
         // echo 'Failed email count: ' . $failed_email_count . '<br>' . PHP_EOL;
 
@@ -129,7 +147,7 @@ if (!isset($_GET['emqm_id'])) {
             // lấy thời gian ghi nhận cuối
             $failed_email_time = intval(explode('|', file_get_contents($file_count_failed))[1]);
             // echo 'Failed email time: ' . $failed_email_time . '<br>' . PHP_EOL;
-            // giãn cách tầm 600s
+            // giãn cách tầm 10 phút
             if ($current_time - $failed_email_time < 600) {
                 echo json_encode(array(
                     'success' => false,
@@ -174,6 +192,10 @@ if (!class_exists('EMQM_Mail_Queue')) {
 
 // Process the email queue
 try {
+    // $a_sent_today = null;
+    $transient_key_today = str_replace('.', '_', basename($path_daily_limit));
+
+    // Chỉ xử lý khi có tham số active_wp_mail
     if (isset($_GET['active_wp_mail'])) {
         // lấy giới hạn từ file settings nếu có
         if (!is_file(__DIR__ . '/settings_cron.php')) {
@@ -210,8 +232,23 @@ try {
 
         // Update daily email count
         if ($my_daily_email_limit > 0 && $processed > 0) {
+            // khi không xác định được số email đã gửi hôm nay thì lấy từ transient (tránh trường hợp update plugin, log cũ bị xóa)
+            if ($emails_sent_today < 1) {
+                $a_sent_today = get_transient($transient_key_today);
+                if ($a_sent_today !== false) {
+                    $a_sent_today = intval($a_sent_today);
+                    if ($a_sent_today > 0) {
+                        $emails_sent_today = $a_sent_today;
+                    }
+                }
+            }
             $emails_sent_today += $processed;
+
+            // lưu số email đã gửi hôm nay vào cache
             file_put_contents($path_daily_limit, $emails_sent_today, LOCK_EX);
+
+            // lưu số email đã gửi hôm nay vào transient
+            set_transient($transient_key_today, $emails_sent_today, DAY_IN_SECONDS);
         }
 
         // Clean up files
@@ -251,6 +288,9 @@ try {
         // 'timestamp' => $current_time,
         // 'current_hour' => $current_hour,
         'sent' => $emails_sent_today . '/' . $my_daily_email_limit,
+        // TEST
+        // 'in_transient' => get_transient($transient_key_today),
+        // 'a_sent_today' => $a_sent_today,
     ));
 } catch (Exception $e) {
     if (get_option('emqm_enable_logging', 0) > 0) {

@@ -253,9 +253,30 @@ class EMQM_Mail_Queue
         $headers = $email->headers ? explode("\n", $email->headers) : array();
         // $attachments = maybe_unserialize($email->attachments);
 
-        // Send the email
-        // $sent = wp_mail($to, $subject, $message, $headers, $attachments);
-        $sent = wp_mail($to, $subject, $message, $headers);
+        // Check email method and send accordingly
+        $mail_method = get_option('emqm_mail_method', 'wp_mail');
+        $sent = false;
+
+        if ($mail_method === 'gmail_api') {
+            // Use Gmail API
+            if (!class_exists('EMQM_Gmail_API')) {
+                require_once EMQM_PLUGIN_PATH . 'includes/class-gmail-api.php';
+            }
+
+            $gmail_api = new EMQM_Gmail_API();
+            if ($gmail_api->is_configured()) {
+                $sent = $gmail_api->send_email($to, $subject, $message, $headers);
+            } else {
+                if ($this->enable_logging) {
+                    error_log('EMQM: Gmail API not configured, falling back to wp_mail for ' . $to);
+                }
+                // Fall back to wp_mail if Gmail API not configured
+                $sent = wp_mail($to, $subject, $message, $headers);
+            }
+        } else {
+            // Use default wp_mail
+            $sent = wp_mail($to, $subject, $message, $headers);
+        }
 
         // tạo file log để tính số lần gửi mail thất bại
         if ($file_count_failed == '') {
@@ -276,7 +297,8 @@ class EMQM_Mail_Queue
             );
 
             if ($this->enable_logging) {
-                error_log('EMQM: Email sent successfully to ' . $to . ' - Subject: ' . $subject);
+                $method_used = $mail_method === 'gmail_api' ? 'Gmail API' : 'wp_mail';
+                error_log('EMQM: Email sent successfully via ' . $method_used . ' to ' . $to . ' - Subject: ' . $subject);
             }
 
             // xóa file log
@@ -300,7 +322,8 @@ class EMQM_Mail_Queue
             }
 
             if ($this->enable_logging) {
-                error_log('EMQM: Failed to send email to ' . $to . ' - Subject: ' . $subject);
+                $method_used = $mail_method === 'gmail_api' ? 'Gmail API' : 'wp_mail';
+                error_log('EMQM: Failed to send email via ' . $method_used . ' to ' . $to . ' - Subject: ' . $subject);
             }
 
             // tính toán số lần thất bại
@@ -353,20 +376,25 @@ class EMQM_Mail_Queue
     {
         global $wpdb;
 
-        $stats = array();
+        $stats = array(
+            'pending' => 0,
+            'sent' => 0,
+            'failed' => 0,
+            'total' => 0,
+        );
 
-        $stats['pending'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
-            'pending'
-        ));
-
-        $stats['sent'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
-            'sent'
-        ));
+        $stats_rows = $wpdb->get_results("SELECT COUNT(id) AS count, status FROM {$this->table_name} GROUP BY status");
+        // print_r($stats_rows);
+        $totals = 0;
+        foreach ($stats_rows as $stats_row) {
+            $stats[$stats_row->status] = intval($stats_row->count);
+            $totals += intval($stats_row->count);
+        }
+        $stats['total'] = $totals;
+        // print_r($stats);
 
         // Hôm nay
-        $hom_nay = date('Y-m-d') . ' 00:00:00';
+        $hom_nay = date_i18n('Y-m-d') . ' 00:00:00';
         // echo $hom_nay . '<br>' . PHP_EOL;
         $stats['sent_today'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s",
@@ -375,7 +403,7 @@ class EMQM_Mail_Queue
         ));
 
         // Cache cho sent_yesterday (không thay đổi nữa)
-        $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+        $yesterday_date = date_i18n('Y-m-d', strtotime('-1 day'));
         $cache_key_yesterday = 'emqm_sent_yesterday_' . $yesterday_date;
         $stats['sent_yesterday'] = get_transient($cache_key_yesterday);
         if ($stats['sent_yesterday'] === false) {
@@ -392,10 +420,10 @@ class EMQM_Mail_Queue
         // Calculate this week (Monday to Sunday)
         $thu_2 = strtotime('monday this week');
         // echo $thu_2 . '<br>' . PHP_EOL;
-        // echo date('Y-m-d', $thu_2) . '<br>' . PHP_EOL;
-        // echo date('Y-m-d', $thu_2 - (24 * 3600 * 7)) . '<br>' . PHP_EOL;
+        // echo date_i18n('Y-m-d', $thu_2) . '<br>' . PHP_EOL;
+        // echo date_i18n('Y-m-d', $thu_2 - (24 * 3600 * 7)) . '<br>' . PHP_EOL;
         //
-        $monday_this_week = date('Y-m-d', $thu_2) . ' 00:00:00';
+        $monday_this_week = date_i18n('Y-m-d', $thu_2) . ' 00:00:00';
         $stats['sent_this_week'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at >= %s",
             'sent',
@@ -403,10 +431,10 @@ class EMQM_Mail_Queue
         ));
 
         // Calculate last week (Monday to Sunday)
-        $monday_last_week = date('Y-m-d', $thu_2 - (24 * 3600 * 7)) . ' 00:00:00';
+        $monday_last_week = date_i18n('Y-m-d', $thu_2 - (24 * 3600 * 7)) . ' 00:00:00';
 
         // Cache cho sent_last_week (không thay đổi nữa)
-        $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+        $last_week_key = date_i18n('Y-m-d', $thu_2 - (24 * 3600 * 7));
         $cache_key_last_week = 'emqm_sent_last_week_' . $last_week_key;
         $stats['sent_last_week'] = get_transient($cache_key_last_week);
         if ($stats['sent_last_week'] === false) {
@@ -421,7 +449,7 @@ class EMQM_Mail_Queue
         }
 
         // Tháng này
-        $thang_nay = date('Y-m') . '-01 00:00:00';
+        $thang_nay = date_i18n('Y-m') . '-01 00:00:00';
         // echo $thang_nay . '<br>' . PHP_EOL;
         $stats['sent_this_month'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s AND sent_at > %s",
@@ -430,7 +458,7 @@ class EMQM_Mail_Queue
         ));
 
         // Cache cho sent_last_month (không thay đổi nữa)
-        $last_month_date = date('Y-m', strtotime('-1 month'));
+        $last_month_date = date_i18n('Y-m', strtotime('-1 month'));
         $cache_key_last_month = 'emqm_sent_last_month_' . $last_month_date;
         $stats['sent_last_month'] = get_transient($cache_key_last_month);
         if ($stats['sent_last_month'] === false) {
@@ -443,12 +471,6 @@ class EMQM_Mail_Queue
             // Cache cho 24 giờ
             set_transient($cache_key_last_month, $stats['sent_last_month'], DAY_IN_SECONDS);
         }
-
-        $stats['failed'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(id) FROM {$this->table_name} WHERE status = %s",
-            'failed'
-        ));
-        $stats['total'] = $wpdb->get_var("SELECT COUNT(id) FROM {$this->table_name}");
 
         return $stats;
     }
@@ -501,32 +523,32 @@ class EMQM_Mail_Queue
     {
         switch ($date_range) {
             case 'yesterday':
-                $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+                $yesterday_date = date_i18n('Y-m-d', strtotime('-1 day'));
                 delete_transient('emqm_sent_yesterday_' . $yesterday_date);
                 break;
 
             case 'last_week':
                 $thu_2 = strtotime('monday this week');
-                $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+                $last_week_key = date_i18n('Y-m-d', $thu_2 - (24 * 3600 * 7));
                 delete_transient('emqm_sent_last_week_' . $last_week_key);
                 break;
 
             case 'last_month':
-                $last_month_date = date('Y-m', strtotime('-1 month'));
+                $last_month_date = date_i18n('Y-m', strtotime('-1 month'));
                 delete_transient('emqm_sent_last_month_' . $last_month_date);
                 break;
 
             case 'all':
             default:
                 // Clear all cached stats
-                $yesterday_date = date('Y-m-d', strtotime('-1 day'));
+                $yesterday_date = date_i18n('Y-m-d', strtotime('-1 day'));
                 delete_transient('emqm_sent_yesterday_' . $yesterday_date);
 
                 $thu_2 = strtotime('monday this week');
-                $last_week_key = date('Y-m-d', $thu_2 - (24 * 3600 * 7));
+                $last_week_key = date_i18n('Y-m-d', $thu_2 - (24 * 3600 * 7));
                 delete_transient('emqm_sent_last_week_' . $last_week_key);
 
-                $last_month_date = date('Y-m', strtotime('-1 month'));
+                $last_month_date = date_i18n('Y-m', strtotime('-1 month'));
                 delete_transient('emqm_sent_last_month_' . $last_month_date);
                 break;
         }

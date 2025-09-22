@@ -31,6 +31,7 @@ class EMQM_Admin_Page
         add_action('wp_ajax_emqm_delete_email', array($this, 'ajax_delete_email'));
         add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
         add_action('wp_ajax_emqm_check_update', array($this, 'ajax_check_update'));
+        add_action('wp_ajax_emqm_test_gmail', array($this, 'ajax_test_gmail'));
 
         // Add admin footer script if autorun is enabled
         add_action('admin_footer', array($this, 'admin_footer_autorun_script'));
@@ -68,6 +69,12 @@ class EMQM_Admin_Page
         register_setting('emqm_settings', 'emqm_daily_email_limit');
         register_setting('emqm_settings', 'emqm_active_hour_start');
         register_setting('emqm_settings', 'emqm_active_hour_end');
+        register_setting('emqm_settings', 'emqm_mail_method');
+        register_setting('emqm_settings', 'emqm_gmail_client_id');
+        register_setting('emqm_settings', 'emqm_gmail_client_secret');
+        register_setting('emqm_settings', 'emqm_gmail_refresh_token');
+        register_setting('emqm_settings', 'emqm_gmail_from_email');
+        register_setting('emqm_settings', 'emqm_gmail_from_name');
         register_setting('emqm_settings', 'emqm_use_wp_cron');
         register_setting('emqm_settings', 'emqm_prevent_duplicates');
         register_setting('emqm_settings', 'emqm_admin_autorun');
@@ -173,6 +180,12 @@ class EMQM_Admin_Page
             update_option('emqm_daily_email_limit', absint($_POST['emqm_daily_email_limit']));
             update_option('emqm_active_hour_start', absint($_POST['emqm_active_hour_start']));
             update_option('emqm_active_hour_end', absint($_POST['emqm_active_hour_end']));
+            update_option('emqm_mail_method', sanitize_text_field($_POST['emqm_mail_method']));
+            update_option('emqm_gmail_client_id', sanitize_text_field($_POST['emqm_gmail_client_id']));
+            update_option('emqm_gmail_client_secret', sanitize_text_field($_POST['emqm_gmail_client_secret']));
+            update_option('emqm_gmail_refresh_token', sanitize_text_field($_POST['emqm_gmail_refresh_token']));
+            update_option('emqm_gmail_from_email', sanitize_email($_POST['emqm_gmail_from_email']));
+            update_option('emqm_gmail_from_name', sanitize_text_field($_POST['emqm_gmail_from_name']));
             update_option('emqm_use_wp_cron', isset($_POST['emqm_use_wp_cron']) ? 1 : 0);
             update_option('emqm_prevent_duplicates', isset($_POST['emqm_prevent_duplicates']) ? 1 : 0);
             update_option('emqm_admin_autorun', isset($_POST['emqm_admin_autorun']) ? 1 : 0);
@@ -330,6 +343,61 @@ class EMQM_Admin_Page
 
             // Output the script
             echo $content;
+        }
+    }
+
+    /**
+     * Test Gmail API connection via AJAX
+     */
+    public function ajax_test_gmail()
+    {
+        check_ajax_referer('emqm_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Unauthorized', 'echbay-mail-queue'));
+        }
+
+        // Temporarily update options with the submitted values for testing
+        $client_id = sanitize_text_field($_POST['client_id']);
+        $client_secret = sanitize_text_field($_POST['client_secret']);
+        $refresh_token = sanitize_text_field($_POST['refresh_token']);
+        $from_email = sanitize_email($_POST['from_email']);
+        $from_name = sanitize_text_field($_POST['from_name']);
+
+        // Temporarily store the values
+        $original_values = array(
+            'client_id' => get_option('emqm_gmail_client_id', ''),
+            'client_secret' => get_option('emqm_gmail_client_secret', ''),
+            'refresh_token' => get_option('emqm_gmail_refresh_token', ''),
+            'from_email' => get_option('emqm_gmail_from_email', ''),
+            'from_name' => get_option('emqm_gmail_from_name', '')
+        );
+
+        update_option('emqm_gmail_client_id', $client_id);
+        update_option('emqm_gmail_client_secret', $client_secret);
+        update_option('emqm_gmail_refresh_token', $refresh_token);
+        update_option('emqm_gmail_from_email', $from_email);
+        update_option('emqm_gmail_from_name', $from_name);
+
+        // Test the connection
+        if (!class_exists('EMQM_Gmail_API')) {
+            require_once EMQM_PLUGIN_PATH . 'includes/class-gmail-api.php';
+        }
+
+        $gmail_api = new EMQM_Gmail_API();
+        $test_result = $gmail_api->test_connection();
+
+        // Restore original values
+        update_option('emqm_gmail_client_id', $original_values['client_id']);
+        update_option('emqm_gmail_client_secret', $original_values['client_secret']);
+        update_option('emqm_gmail_refresh_token', $original_values['refresh_token']);
+        update_option('emqm_gmail_from_email', $original_values['from_email']);
+        update_option('emqm_gmail_from_name', $original_values['from_name']);
+
+        if ($test_result['success']) {
+            wp_send_json_success($test_result);
+        } else {
+            wp_send_json_error($test_result['message']);
         }
     }
 }

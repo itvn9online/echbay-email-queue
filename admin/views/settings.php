@@ -123,6 +123,85 @@ if (!defined('ABSPATH')) {
 
             <tr>
                 <th scope="row">
+                    <label for="emqm_mail_method"><?php _e('Email Method', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <select id="emqm_mail_method" name="emqm_mail_method">
+                        <option value="wp_mail" <?php selected(get_option('emqm_mail_method', 'wp_mail'), 'wp_mail'); ?>><?php _e('WordPress wp_mail()', 'echbay-mail-queue'); ?></option>
+                        <option value="gmail_api" <?php selected(get_option('emqm_mail_method', 'wp_mail'), 'gmail_api'); ?>><?php _e('Gmail API', 'echbay-mail-queue'); ?></option>
+                    </select>
+                    <p class="description"><?php _e('Choose email sending method. Gmail API provides better deliverability and detailed tracking.', 'echbay-mail-queue'); ?></p>
+                </td>
+            </tr>
+
+            <tr id="gmail_api_settings" style="display: <?php echo get_option('emqm_mail_method', 'wp_mail') === 'gmail_api' ? 'table-row' : 'none'; ?>;">
+                <th scope="row">
+                    <label><?php _e('Gmail API Settings', 'echbay-mail-queue'); ?></label>
+                </th>
+                <td>
+                    <table class="form-table" style="margin: 0;">
+                        <tr>
+                            <th scope="row" style="width: 150px;">
+                                <label for="emqm_gmail_client_id"><?php _e('Client ID', 'echbay-mail-queue'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="emqm_gmail_client_id" name="emqm_gmail_client_id" value="<?php echo esc_attr(get_option('emqm_gmail_client_id', '')); ?>" style="width: 400px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="emqm_gmail_client_secret"><?php _e('Client Secret', 'echbay-mail-queue'); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="emqm_gmail_client_secret" name="emqm_gmail_client_secret" value="<?php echo esc_attr(get_option('emqm_gmail_client_secret', '')); ?>" style="width: 400px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="emqm_gmail_refresh_token"><?php _e('Refresh Token', 'echbay-mail-queue'); ?></label>
+                            </th>
+                            <td>
+                                <input type="password" id="emqm_gmail_refresh_token" name="emqm_gmail_refresh_token" value="<?php echo esc_attr(get_option('emqm_gmail_refresh_token', '')); ?>" style="width: 400px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="emqm_gmail_from_email"><?php _e('From Email', 'echbay-mail-queue'); ?></label>
+                            </th>
+                            <td>
+                                <input type="email" id="emqm_gmail_from_email" name="emqm_gmail_from_email" value="<?php echo esc_attr(get_option('emqm_gmail_from_email', '')); ?>" style="width: 400px;" />
+                                <p class="description"><?php _e('Email address that will appear as sender (must be authorized for your Gmail account)', 'echbay-mail-queue'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="emqm_gmail_from_name"><?php _e('From Name', 'echbay-mail-queue'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="emqm_gmail_from_name" name="emqm_gmail_from_name" value="<?php echo esc_attr(get_option('emqm_gmail_from_name', '')); ?>" style="width: 400px;" />
+                                <p class="description"><?php _e('Display name that will appear as sender', 'echbay-mail-queue'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="description">
+                        <strong><?php _e('Setup Instructions:', 'echbay-mail-queue'); ?></strong><br>
+                        1. Go to <a href="https://console.developers.google.com/" target="_blank">Google Cloud Console</a><br>
+                        2. Create a new project or select existing one<br>
+                        3. Enable Gmail API<br>
+                        4. Create OAuth 2.0 credentials<br>
+                        5. Use OAuth 2.0 Playground to get refresh token
+                    </p>
+                    <p>
+                        <button type="button" id="emqm-test-gmail" class="button" style="display: <?php echo get_option('emqm_mail_method', 'wp_mail') === 'gmail_api' ? 'inline-block' : 'none'; ?>;">
+                            <?php _e('Test Gmail API Connection', 'echbay-mail-queue'); ?>
+                        </button>
+                        <span id="emqm-gmail-test-result" style="margin-left: 10px;"></span>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
                     <label for="emqm_use_wp_cron"><?php _e('Use WP Cron', 'echbay-mail-queue'); ?></label>
                 </th>
                 <td>
@@ -213,3 +292,104 @@ if (!defined('ABSPATH')) {
 
     <?php submit_button(); ?>
 </form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.querySelector('form');
+        if (!form) return;
+
+        // Handle email method selection
+        var emailMethodSelect = document.getElementById('emqm_mail_method');
+        var gmailSettings = document.getElementById('gmail_api_settings');
+        var testGmailBtn = document.getElementById('emqm-test-gmail');
+
+        if (emailMethodSelect && gmailSettings) {
+            emailMethodSelect.addEventListener('change', function() {
+                if (this.value === 'gmail_api') {
+                    gmailSettings.style.display = 'table-row';
+                    if (testGmailBtn) testGmailBtn.style.display = 'inline-block';
+                } else {
+                    gmailSettings.style.display = 'none';
+                    if (testGmailBtn) testGmailBtn.style.display = 'none';
+                }
+            });
+        }
+
+        // Handle Gmail API test
+        if (testGmailBtn) {
+            testGmailBtn.addEventListener('click', function() {
+                var resultSpan = document.getElementById('emqm-gmail-test-result');
+                var btn = this;
+
+                btn.disabled = true;
+                btn.textContent = 'Testing...';
+                if (resultSpan) resultSpan.textContent = '';
+
+                // Collect Gmail settings
+                var data = {
+                    action: 'emqm_test_gmail',
+                    nonce: (typeof emqm_ajax !== 'undefined') ? emqm_ajax.nonce : '',
+                    client_id: document.getElementById('emqm_gmail_client_id').value,
+                    client_secret: document.getElementById('emqm_gmail_client_secret').value,
+                    refresh_token: document.getElementById('emqm_gmail_refresh_token').value,
+                    from_email: document.getElementById('emqm_gmail_from_email').value,
+                    from_name: document.getElementById('emqm_gmail_from_name').value
+                };
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', (typeof emqm_ajax !== 'undefined') ? emqm_ajax.ajaxurl : '/wp-admin/admin-ajax.php');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        btn.disabled = false;
+                        btn.textContent = 'Test Gmail API Connection';
+
+                        if (xhr.status === 200) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.success) {
+                                    if (resultSpan) {
+                                        resultSpan.style.color = 'green';
+                                        resultSpan.textContent = '✓ ' + response.data.message +
+                                            (response.data.email ? ' (' + response.data.email + ')' : '');
+                                    }
+                                } else {
+                                    if (resultSpan) {
+                                        resultSpan.style.color = 'red';
+                                        resultSpan.textContent = '✗ ' + (response.data || 'Test failed');
+                                    }
+                                }
+                            } catch (e) {
+                                if (resultSpan) {
+                                    resultSpan.style.color = 'red';
+                                    resultSpan.textContent = '✗ Invalid response';
+                                }
+                            }
+                        } else {
+                            if (resultSpan) {
+                                resultSpan.style.color = 'red';
+                                resultSpan.textContent = '✗ Request failed';
+                            }
+                        }
+                    }
+                };
+
+                var params = Object.keys(data).map(function(key) {
+                    return encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
+                }).join('&');
+
+                xhr.send(params);
+            });
+        }
+
+        // Form validation
+        form.addEventListener('submit', function(e) {
+            var start = parseInt(document.getElementById('emqm_active_hour_start').value, 10);
+            var end = parseInt(document.getElementById('emqm_active_hour_end').value, 10);
+            if (end > 0 && start > 0 && end < start) {
+                alert('Giờ kết thúc phải lớn hơn hoặc bằng giờ bắt đầu!');
+                e.preventDefault();
+            }
+        });
+    });
+</script>
