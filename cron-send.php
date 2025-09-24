@@ -55,16 +55,6 @@ if (!isset($_GET['emqm_id'])) {
     if ($my_daily_email_limit > 0) {
         if (is_file($path_daily_limit)) {
             $emails_sent_today = intval(file_get_contents($path_daily_limit));
-
-            // cứ mỗi 99 email thì reset lại lock file để các domain khác có thể lên thay
-            if (
-                $emails_sent_today > 0 &&
-                $emails_sent_today % 99 == 0 &&
-                $emails_sent_today < $my_daily_email_limit &&
-                is_file($lock_file)
-            ) {
-                unlink($lock_file);
-            }
         }
 
         // Check daily send limit
@@ -88,9 +78,10 @@ if (!isset($_GET['emqm_id'])) {
         // nếu có file lock thì kiểm tra nội dung file
         // nếu nội dung file khác với domain_prefix hiện tại thì có cron khác đang chạy
         $lock_content =  file_get_contents($lock_file);
-        if ($lock_content != $domain_prefix) {
+        if (strpos($lock_content, $domain_prefix) === false) {
             // xem thời gian tạo file lock lâu chưa, dưới 5 phút thì coi như cron đang chạy
-            if ($current_time - filemtime($lock_file) < 300) {
+            // if ($current_time - filemtime($lock_file) < 300) {
+            if ($current_time - intval(explode('|', $lock_content)[0]) < 300) {
                 // thoát để tránh xung đột
                 echo json_encode(array(
                     'success' => false,
@@ -105,10 +96,20 @@ if (!isset($_GET['emqm_id'])) {
         }
     }
 
-    // Tạo lock file
-    file_put_contents($lock_file, $domain_prefix, LOCK_EX);
-    // thiết lập thời gian tạo file lock
-    touch($lock_file, $current_time);
+    // cứ mỗi 22 email thì reset lại lock file để các domain khác có thể lên thay
+    if (
+        $emails_sent_today > 0 &&
+        $emails_sent_today % 22 == 0 &&
+        $emails_sent_today < $my_daily_email_limit &&
+        is_file($lock_file)
+    ) {
+        unlink($lock_file);
+    } else {
+        // Tạo lock file
+        file_put_contents($lock_file, $current_time . '|' . $domain_prefix, LOCK_EX);
+        // thiết lập thời gian tạo file lock
+        // touch($lock_file, $current_time);
+    }
 
     // Rate limiting: chỉ cho phép chạy cron nếu đã đủ thời gian kể từ lần chạy cuối
     // tránh việc cron chạy liên tục trong thời gian ngắn
