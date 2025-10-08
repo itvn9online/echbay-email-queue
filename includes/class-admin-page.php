@@ -213,7 +213,7 @@ class EMQM_Admin_Page
                 $timezone = 'UTC';
             }
 
-            file_put_contents(EMQM_PLUGIN_PATH . 'settings_cron.php', implode(
+            if (file_put_contents(EMQM_PLUGIN_PATH . 'settings_cron.php', implode(
                 PHP_EOL,
                 [
                     '<?php',
@@ -226,9 +226,11 @@ class EMQM_Admin_Page
                     '$my_active_hour_end = ' . intval($my_active_hour_end) . ';',
                     '$my_default_timezone = \'' . $timezone . '\';',
                 ]
-            ), LOCK_EX);
-
-            echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'echbay-mail-queue') . '</p></div>';
+            ), LOCK_EX)) {
+                echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'echbay-mail-queue') . ' with Timezone `' . esc_html($timezone) . '` in file ' . esc_html(str_replace(ABSPATH, '/', EMQM_PLUGIN_PATH . 'settings_cron.php')) . '</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>' . __('Failed to write settings file. Please check file permissions for', 'echbay-mail-queue') . ' ' . esc_html(str_replace(ABSPATH, '/', EMQM_PLUGIN_PATH . 'settings_cron.php')) . '</p></div>';
+            }
         }
 
         // Test bypass logic for debugging

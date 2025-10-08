@@ -31,7 +31,10 @@ $current_time = time();
 // thêm prefix theo domain để chạy multiple domain trên cùng 1 source
 $domain_prefix = explode(':', $_SERVER['HTTP_HOST'])[0] . '_';
 $emails_sent_today = 0;
-$path_daily_limit = __DIR__ . '/' . $domain_prefix . 'daily_limit-' . date('Y-m-d') . '.log';
+$prefix_daily_limit =  $domain_prefix . 'daily_limit-';
+$path_daily_limit = __DIR__ . '/' . $prefix_daily_limit . date('Y-m-d') . '.log';
+// lần đầu gửi mail trong ngày thì gửi thêm 1 mail cho admin để báo cáo
+$first_daily_sent = false;
 
 // Process lock mechanism - chỉ cho phép 1 cron chạy cùng lúc
 if (!isset($_GET['emqm_id'])) {
@@ -55,6 +58,17 @@ if (!isset($_GET['emqm_id'])) {
     if ($my_daily_email_limit > 0) {
         if (is_file($path_daily_limit)) {
             $emails_sent_today = intval(file_get_contents($path_daily_limit));
+        } else {
+            // tìm và xóa các file log có cùng prefix nhưng khác ngày
+            $files = glob(__DIR__ . '/' . $prefix_daily_limit . '*.log');
+            foreach ($files as $file) {
+                if (strpos($file, date('Y-m-d') . '.log') === false) {
+                    unlink($file);
+                }
+            }
+
+            // Gửi email báo cáo cho admin
+            $first_daily_sent = true;
         }
 
         // Check daily send limit
@@ -79,14 +93,13 @@ if (!isset($_GET['emqm_id'])) {
         // nếu nội dung file khác với domain_prefix hiện tại thì có cron khác đang chạy
         $lock_content =  file_get_contents($lock_file);
         if (strpos($lock_content, $domain_prefix) === false) {
-            // xem thời gian tạo file lock lâu chưa, dưới 5 phút thì coi như cron đang chạy
-            // if ($current_time - filemtime($lock_file) < 300) {
-            if ($current_time - intval(explode('|', $lock_content)[0]) < 300) {
+            // xem thời gian tạo file lock lâu chưa, dưới 3 phút thì coi như cron đang chạy
+            if ($current_time - intval(explode('|', $lock_content)[0]) < 180) {
                 // thoát để tránh xung đột
                 echo json_encode(array(
                     'success' => false,
-                    'lock_content' => $lock_content,
-                    'message' => 'Cron process is running. Please wait...',
+                    // 'lock_content' => $lock_content,
+                    'message' => $lock_content . ' is running...',
                 ));
                 exit();
             } else {
@@ -107,8 +120,6 @@ if (!isset($_GET['emqm_id'])) {
     } else {
         // Tạo lock file
         file_put_contents($lock_file, $current_time . '|' . $domain_prefix, LOCK_EX);
-        // thiết lập thời gian tạo file lock
-        // touch($lock_file, $current_time);
     }
 
     // Rate limiting: chỉ cho phép chạy cron nếu đã đủ thời gian kể từ lần chạy cuối
@@ -116,7 +127,7 @@ if (!isset($_GET['emqm_id'])) {
     // có thể bỏ đoạn này nếu muốn cron chạy liên tục không giới hạn
     // vì đã có cơ chế lock file để tránh việc chạy chồng chéo
     $last_run = is_file($last_run_option) ? (int) file_get_contents($last_run_option) : 0;
-    $min_interval = 55; // Minimum 55 seconds between runs
+    $min_interval = 22; // Minimum 22 seconds between runs
 
     if (($current_time - $last_run) < $min_interval) {
         echo json_encode(array(
@@ -199,7 +210,7 @@ try {
     if (isset($_GET['active_wp_mail'])) {
         // Process the email queue
         $mail_queue = new EMQM_Mail_Queue(true);
-        $processed = $mail_queue->process_queue($file_count_failed);
+        $processed = $mail_queue->process_queue($file_count_failed, $first_daily_sent);
 
         // Update daily email count
         if ($my_daily_email_limit > 0 && $processed > 0) {
@@ -276,3 +287,6 @@ try {
         'error' => $e->getMessage()
     ));
 }
+
+// 
+exit();

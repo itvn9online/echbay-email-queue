@@ -163,7 +163,7 @@ class EMQM_Mail_Queue
     /**
      * Process email queue
      */
-    public function process_queue($file_count_failed = '')
+    public function process_queue($file_count_failed = '', $first_daily_sent = false)
     {
         // Process email queue
         global $wpdb;
@@ -216,11 +216,13 @@ class EMQM_Mail_Queue
             }
 
             // 
-            if (!$this->send_email($email, $file_count_failed)) {
+            if (!$this->send_email($email, $file_count_failed, $first_daily_sent)) {
                 // Handle failed email -> gửi lỗi thì out luôn thôi
                 break;
             }
             $count++;
+            // Đánh dấu đã gửi email lần đầu trong ngày
+            $first_daily_sent = false;
 
             // Thêm sleep để tránh quá tải server, có thể điều chỉnh theo nhu cầu
             sleep(1);
@@ -235,7 +237,7 @@ class EMQM_Mail_Queue
     /**
      * Send individual email
      */
-    private function send_email($email, $file_count_failed = '')
+    private function send_email($email, $file_count_failed = '', $first_daily_sent = false)
     {
         global $wpdb;
 
@@ -260,6 +262,7 @@ class EMQM_Mail_Queue
         $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
         $mail_method = get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail');
         $sent = false;
+        $gmail_api = null;
 
         if ($mail_method === 'gmail_api') {
             // Use Gmail API
@@ -304,6 +307,18 @@ class EMQM_Mail_Queue
             // xóa file log
             if (is_file($file_count_failed)) {
                 unlink($file_count_failed);
+            }
+
+            // Gửi email báo cáo cho admin nếu là lần đầu gửi mail trong ngày
+            if ($first_daily_sent === true) {
+                $admin_email = get_option('admin_email');
+                if ($admin_email) {
+                    if ($gmail_api !== null) {
+                        $gmail_api->send_email($admin_email, '[' . $_SERVER['HTTP_HOST'] . '] ' . $subject, $message, $headers);
+                    } else {
+                        wp_mail($admin_email, '[' . $_SERVER['HTTP_HOST'] . '] ' . $subject, $message, $headers);
+                    }
+                }
             }
 
             // 

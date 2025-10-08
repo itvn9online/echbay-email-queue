@@ -26,7 +26,7 @@ class EMQM_Gmail_API
         $this->client_secret = get_option($this->domain_prefix . 'emqm_gmail_client_secret', '');
         $this->refresh_token = get_option($this->domain_prefix . 'emqm_gmail_refresh_token', '');
         $this->from_email = get_option($this->domain_prefix . 'emqm_gmail_from_email', '');
-        $this->from_name = get_option($this->domain_prefix . 'emqm_gmail_from_name', '');
+        $this->from_name = get_option($this->domain_prefix . 'emqm_gmail_from_name') ?: (get_option('blogname') ?: $_SERVER['HTTP_HOST']);
         $this->enable_logging = get_option('emqm_enable_logging', 0) > 0 ? true : false;
     }
 

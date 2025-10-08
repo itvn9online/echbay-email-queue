@@ -183,12 +183,12 @@ $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
                             </th>
                             <td>
                                 <input type="text" id="emqm_gmail_from_name" name="emqm_gmail_from_name" value="<?php echo esc_attr(get_option($gmail_domain_prefix . 'emqm_gmail_from_name', '')); ?>" style="width: 400px;" />
-                                <p class="description"><?php _e('Display name that will appear as sender', 'echbay-mail-queue'); ?></p>
+                                <p class="description"><?php _e('Display name that will appear as sender. Using Blog Name if empty.', 'echbay-mail-queue'); ?></p>
                             </td>
                         </tr>
                     </table>
                     <p class="description">
-                        * Plugin này thường được sử dụng kèm với plugin `Mail Marketing Importer`. Nếu có sẵn rồi hãy <a href="<?php echo admin_url(); ?>tools.php?page=email-campaigns&google-workspace=true" style="font-weight: bold;" target="_blank">vào đây để kết nối Gmail API</a> sau đó copy dữ liệu qua bên này.<br><br>
+                        * Plugin này thường được sử dụng kèm với plugin <a href="https://github.com/itvn9online/mail-marketing-importer" style="font-weight: bold;" target="_blank">Mail Marketing Importer</a>. Nếu có sẵn rồi hãy <a href="<?php echo admin_url(); ?>tools.php?page=email-campaigns&google-workspace=true" style="font-weight: bold;" target="_blank">vào đây để kết nối Gmail API</a> sau đó copy dữ liệu qua bên này.<br><br>
                         <strong><?php _e('Setup Instructions:', 'echbay-mail-queue'); ?></strong><br>
                         1. Go to <a href="https://console.developers.google.com/" target="_blank">Google Cloud Console</a><br>
                         2. Create a new project or select existing one<br>
