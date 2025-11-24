@@ -27,7 +27,9 @@ $options = array(
     'emqm_active_hour_start',
     'emqm_active_hour_end',
     'emqm_use_wp_cron',
-    'emqm_last_cron_run'
+    'emqm_prevent_duplicates',
+    'emqm_admin_autorun',
+    'emqm_frontend_autorun',
 );
 
 foreach ($options as $option) {
@@ -35,5 +37,5 @@ foreach ($options as $option) {
 }
 
 // Clear scheduled events - không cần thiết vì đã bỏ WordPress cron
-// wp_clear_scheduled_hook('emqm_process_queue');
-// wp_clear_scheduled_hook('emqm_cleanup_old_emails');
+wp_clear_scheduled_hook('emqm_process_queue');
+wp_clear_scheduled_hook('emqm_cleanup_old_emails');
