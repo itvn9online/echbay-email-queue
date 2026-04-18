@@ -135,6 +135,9 @@ $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
                         <option value="gmail_api" <?php selected(get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail'), 'gmail_api'); ?>><?php _e('Gmail API', 'echbay-mail-queue'); ?></option>
                     </select>
                     <p class="description"><?php _e('Choose email sending method. Gmail API provides better deliverability and detailed tracking.', 'echbay-mail-queue'); ?></p>
+                    <p id="wp_mail_settings" class="description" style="display: <?php echo get_option($gmail_domain_prefix . 'emqm_mail_method', 'wp_mail') === 'wp_mail' ? 'block' : 'none'; ?>;">
+                        * Plugin này thường được sử dụng kèm với plugin <a href="https://github.com/itvn9online/smtp-config-manager" style="font-weight: bold;" target="_blank">SMTP Config Manager</a> vì nó hỗ trợ Gmail API, thường có độ tin cậy và tỷ lệ gửi thành công cao hơn SMTP truyền thống.
+                    </p>
                 </td>
             </tr>
 
@@ -307,6 +310,7 @@ $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
         // Handle email method selection
         var emailMethodSelect = document.getElementById('emqm_mail_method');
         var gmailSettings = document.getElementById('gmail_api_settings');
+        var wpMailSettings = document.getElementById('wp_mail_settings');
         var testGmailBtn = document.getElementById('emqm-test-gmail');
 
         if (emailMethodSelect && gmailSettings) {
@@ -314,10 +318,12 @@ $gmail_domain_prefix = EMQM_Gmail_API::get_domain_prefix_static();
             function updateGmailSettings() {
                 if (emailMethodSelect.value === 'gmail_api') {
                     gmailSettings.style.display = 'table-row';
-                    if (testGmailBtn) testGmailBtn.style.display = 'inline-block';
+                    wpMailSettings.style.display = 'none';
+                    testGmailBtn.style.display = 'block';
                 } else {
                     gmailSettings.style.display = 'none';
-                    if (testGmailBtn) testGmailBtn.style.display = 'none';
+                    wpMailSettings.style.display = 'table-row';
+                    testGmailBtn.style.display = 'none';
                 }
             }
 
