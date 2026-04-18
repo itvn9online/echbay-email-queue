@@ -49,6 +49,38 @@
     gap: 10px;
 }
 
+/* Button danger style */
+.button.button-danger {
+    background: #dc3232;
+    border-color: #dc3232;
+    color: #fff;
+    text-shadow: 0 -1px 1px #a02525, 1px 0 1px #a02525, 0 1px 1px #a02525, -1px 0 1px #a02525;
+    box-shadow: 0 1px 0 #a02525;
+}
+
+.button.button-danger:hover,
+.button.button-danger:focus {
+    background: #c52929;
+    border-color: #c52929;
+    color: #fff;
+}
+
+.button.button-danger:active {
+    background: #a02525;
+    border-color: #a02525;
+    box-shadow: inset 0 2px 0 #7e1d1d;
+}
+
+.button.button-danger:disabled,
+.button.button-danger.disabled {
+    background: #e89090 !important;
+    border-color: #e89090 !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Email message viewer styles */
 .email-message-container {
     margin-top: 10px;

@@ -184,6 +184,49 @@ jQuery(document).ready(function ($) {
 		});
 	});
 
+	// Cleanup old emails
+	$("#cleanup-old-emails").on("click", function (e) {
+		e.preventDefault();
+
+		if (
+			!confirm(
+				"Are you sure you want to delete all sent emails older than 90 days? This action cannot be undone."
+			)
+		) {
+			return;
+		}
+
+		var $button = $(this);
+		var originalText = $button.text();
+		$button.prop("disabled", true).text("Cleaning up...");
+
+		$.ajax({
+			url: emqm_ajax.ajaxurl,
+			type: "POST",
+			data: {
+				action: "emqm_cleanup_old_emails",
+				days: 90,
+				nonce: emqm_ajax.nonce,
+			},
+			success: function (response) {
+				if (response.success) {
+					showNotice(response.data, "success");
+					setTimeout(function () {
+						location.reload();
+					}, 1500);
+				} else {
+					showNotice("Failed to cleanup old emails", "error");
+				}
+			},
+			error: function () {
+				showNotice("An error occurred", "error");
+			},
+			complete: function () {
+				$button.prop("disabled", false).text(originalText);
+			},
+		});
+	});
+
 	// Show notice function
 	function showNotice(message, type) {
 		var noticeClass = type === "success" ? "notice-success" : "notice-error";

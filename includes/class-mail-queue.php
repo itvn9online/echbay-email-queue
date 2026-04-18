@@ -385,6 +385,26 @@ class EMQM_Mail_Queue
     }
 
     /**
+     * Delete old sent emails (sent_at older than specified days)
+     * 
+     * @param int $days Number of days to keep
+     * @return int Number of deleted emails
+     */
+    public function delete_old_sent_emails($days = 90)
+    {
+        global $wpdb;
+
+        $date_threshold = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+
+        $deleted = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$this->table_name} WHERE sent_at IS NOT NULL AND sent_at < %s",
+            $date_threshold
+        ));
+
+        return $deleted !== false ? $deleted : 0;
+    }
+
+    /**
      * Get queue stats
      */
     public function get_queue_stats()

@@ -75,6 +75,10 @@ $cron_send_url = str_replace(ABSPATH, get_home_url() . '/', EMQM_PLUGIN_PATH) . 
         <button type="button" class="button" onclick="location.reload()">
             <?php _e('Refresh', 'echbay-mail-queue'); ?>
         </button>
+
+        <button type="button" id="cleanup-old-emails" class="button button-danger" title="<?php _e('Delete sent emails older than 90 days', 'echbay-mail-queue'); ?>">
+            <?php _e('Cleanup Old Emails (90+ days)', 'echbay-mail-queue'); ?>
+        </button>
     </form>
 </div>
 

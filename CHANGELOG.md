@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.5] - 2026-04-07
+
+### Added
+
+- **Cleanup Old Emails**: Added button to delete sent emails older than 90 days
+- **Red Danger Button**: Warning-styled button in filters section for cleanup action
+- **Confirmation Dialog**: Safety confirmation before deleting old emails
+- **AJAX Handler**: Backend support for cleaning up old sent emails
+- **Success Message**: Shows number of deleted emails after cleanup
+
+### Technical Details
+
+- **Method**: `delete_old_sent_emails($days)` in `EMQM_Mail_Queue` class
+- **AJAX Action**: `emqm_cleanup_old_emails` with nonce verification
+- **Query**: Deletes emails where `sent_at < 90 days ago`
+- **UI Position**: Red button next to Refresh button in filters form
+
 ## [1.2.3] - 2025-09-19
 
 ### Added

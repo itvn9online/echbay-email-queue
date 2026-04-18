@@ -29,6 +29,7 @@ class EMQM_Admin_Page
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_emqm_retry_email', array($this, 'ajax_retry_email'));
         add_action('wp_ajax_emqm_delete_email', array($this, 'ajax_delete_email'));
+        add_action('wp_ajax_emqm_cleanup_old_emails', array($this, 'ajax_cleanup_old_emails'));
         add_action('wp_ajax_emqm_process_queue_manually', array($this, 'ajax_process_queue_manually'));
         add_action('wp_ajax_emqm_check_update', array($this, 'ajax_check_update'));
         add_action('wp_ajax_emqm_test_gmail', array($this, 'ajax_test_gmail'));
@@ -286,6 +287,31 @@ class EMQM_Admin_Page
             wp_send_json_success(__('Email deleted.', 'echbay-mail-queue'));
         } else {
             wp_send_json_error(__('Failed to delete email.', 'echbay-mail-queue'));
+        }
+    }
+
+    /**
+     * AJAX cleanup old sent emails
+     */
+    public function ajax_cleanup_old_emails()
+    {
+        check_ajax_referer('emqm_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized', 'echbay-mail-queue'));
+        }
+
+        $days = isset($_POST['days']) ? absint($_POST['days']) : 90;
+        $deleted_count = $this->mail_queue->delete_old_sent_emails($days);
+
+        if ($deleted_count > 0) {
+            wp_send_json_success(sprintf(
+                __('Deleted %d emails older than %d days.', 'echbay-mail-queue'),
+                $deleted_count,
+                $days
+            ));
+        } else {
+            wp_send_json_success(__('No old emails to delete.', 'echbay-mail-queue'));
         }
     }
 

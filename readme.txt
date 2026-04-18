@@ -2,7 +2,7 @@
 Contributors: daoquocdai
 Tags: email, queue, smtp, performance, mail
 Requires at least: 5.0
-Tested up to: 6.4
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.2.4
 License: GPL2
