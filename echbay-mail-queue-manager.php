@@ -18,9 +18,24 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('EMQM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EMQM_PLUGIN_PATH', __DIR__ . '/');
-define('EMQM_VERSION', trim(file_get_contents(__DIR__ . '/VERSION')));
+define('EMQM_VERSION', emqm_get_plugin_version());
 // dùng để xác định bản ghi trùng lặp
 define('EMQM_FIXED_TIME', date_i18n('Y-m-d H:i:s'));
+
+/**
+ * Read plugin version from VERSION or version.txt.
+ */
+function emqm_get_plugin_version()
+{
+    foreach (array('VERSION', 'version.txt') as $version_file) {
+        $path = __DIR__ . '/' . $version_file;
+        if (is_readable($path)) {
+            return trim((string) file_get_contents($path));
+        }
+    }
+
+    return '0.0.0';
+}
 
 // Include required files
 require_once EMQM_PLUGIN_PATH . 'includes/class-activator.php';
